@@ -1,44 +1,22 @@
-import { useEffect, useState } from 'react'
+import { RefreshCw } from 'lucide-react'
 
-function formatTimeAgo(iso) {
-  const seconds = Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 1000))
-  if (seconds < 5) return 'just now'
-  if (seconds < 60) return `${seconds}s ago`
-  const minutes = Math.floor(seconds / 60)
-  return `${minutes}m ago`
-}
-
-export default function Topbar({ status }) {
-  const [, forceTick] = useState(0)
-
-  useEffect(() => {
-    const interval = setInterval(() => forceTick((n) => n + 1), 1000)
-    return () => clearInterval(interval)
-  }, [])
-
-  const isOnline = status.wifiStatus === 'online'
-
+export default function Topbar({ status, pageTitle, onRefresh, refreshing }) {
+  const demo = status.wifiStatus === 'demo'
+  const online = status.wifiStatus === 'online'
   return (
-    <header className="flex items-center justify-between border-b border-line bg-paper px-6 py-4 md:px-8">
+    <header className="flex flex-wrap items-center justify-between gap-3 border-b border-line bg-paper px-5 py-4 md:px-8">
       <div>
-        <h1 className="font-display text-lg font-semibold text-ash-900">Overview</h1>
-        <p className="text-sm text-ash-600">{status.deviceName}</p>
+        <h1 className="font-display text-lg font-semibold text-ash-900">{pageTitle}</h1>
+        <p className="text-sm text-ash-600">{status.deviceName || 'Smart Glasses'}</p>
       </div>
-
-      <div className="flex items-center gap-2 rounded-md border border-line bg-white px-3 py-1.5">
-        <span className="relative flex h-2 w-2">
-          {isOnline && (
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-signal-light opacity-60" />
-          )}
-          <span
-            className={`relative inline-flex h-2 w-2 rounded-full ${
-              isOnline ? 'bg-signal-light' : 'bg-danger'
-            }`}
-          />
+      <div className="flex items-center gap-3">
+        <span className="flex items-center gap-2 text-xs font-medium text-ash-600">
+          <span className={`h-2 w-2 rounded-full ${demo ? 'bg-amber' : online ? 'bg-signal-light' : 'bg-danger'}`} />
+          {demo ? 'Demo mode' : online ? 'Connected' : 'Offline'}
         </span>
-        <span className="text-xs font-medium text-ash-600">
-          {isOnline ? 'Connected' : 'Offline'} &middot; last seen {formatTimeAgo(status.lastSeen)}
-        </span>
+        <button type="button" onClick={onRefresh} disabled={refreshing} className="flex items-center gap-2 border border-line bg-white px-3 py-2 text-xs font-medium text-ash-700 hover:bg-ash-50 disabled:opacity-50">
+          <RefreshCw size={14} className={refreshing ? 'animate-spin' : ''} />Refresh
+        </button>
       </div>
     </header>
   )

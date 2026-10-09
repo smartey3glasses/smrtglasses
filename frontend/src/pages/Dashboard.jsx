@@ -1,3 +1,5 @@
+import { useMemo, useState } from 'react'
+import { Download, MapPin, Search, Settings2, ShieldCheck, Watch, Bell, BellOff, RotateCcw } from 'lucide-react'
 import { useTelemetry } from '@/lib/useTelemetry'
 import { useLinkedDevice } from '@/lib/useLinkedDevice'
 import DashboardLayout from '@/components/layout/DashboardLayout'
@@ -7,59 +9,90 @@ import ObstacleTimeline from '@/components/dashboard/ObstacleTimeline'
 import LiveMap from '@/components/dashboard/LiveMap'
 import StatPill from '@/components/dashboard/StatPill'
 import DeviceLinkBanner from '@/components/dashboard/DeviceLinkBanner'
-import { FlaskConical } from 'lucide-react'
+
+const TITLES = { overview: 'Monitoring overview', location: 'Location', events: 'Event log', device: 'Device status', settings: 'Settings' }
+
+function downloadEvents(events) {
+  const header = ['Time', 'Direction', 'Distance (cm)', 'Severity', 'Message']
+  const rows = events.map((event) => [event.timestamp, event.direction, event.distanceCm, event.severity, event.voiceCommand])
+  const csv = [header, ...rows].map((row) => row.map((value) => `"${String(value ?? '').replaceAll('"', '""')}"`).join(',')).join('\n')
+  const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }))
+  const link = document.createElement('a')
+  link.href = url
+  link.download = 'smart-glasses-event-log.csv'
+  link.click()
+  URL.revokeObjectURL(url)
+}
+
+function SectionHeading({ title, description, action }) {
+  return <div className="mb-5 flex flex-wrap items-end justify-between gap-3"><div><h2 className="font-display text-xl font-semibold text-ash-900">{title}</h2><p className="mt-1 text-sm text-ash-600">{description}</p></div>{action}</div>
+}
 
 export default function Dashboard() {
   const { events, status, history, currentLocation } = useTelemetry()
   const { device, loading: deviceLoading, error: deviceError } = useLinkedDevice()
+  const [page, setPage] = useState('overview')
+  const [query, setQuery] = useState('')
+  const [severity, setSeverity] = useState('all')
+  const [refreshing, setRefreshing] = useState(false)
+  const [alertsEnabled, setAlertsEnabled] = useState(() => localStorage.getItem('sg-alerts') !== 'off')
+  const [units, setUnits] = useState(() => localStorage.getItem('sg-distance-units') || 'cm')
 
-  const dangerCount = events.filter((e) => e.severity === 'danger').length
-  const averageDistance =
-    events.length > 0
-      ? Math.round(events.reduce((sum, e) => sum + e.distanceCm, 0) / events.length)
-      : null
+  const dangerCount = events.filter((event) => event.severity === 'danger').length
+  const averageDistance = events.length ? Math.round(events.reduce((sum, event) => sum + event.distanceCm, 0) / events.length) : null
+  const filteredEvents = useMemo(() => events.filter((event) => {
+    const matchesQuery = `${event.voiceCommand} ${event.direction} ${event.distanceCm} ${event.severity}`.toLowerCase().includes(query.toLowerCase())
+    return matchesQuery && (severity === 'all' || event.severity === severity)
+  }), [events, query, severity])
+
+  function refresh() {
+    setRefreshing(true)
+    window.setTimeout(() => setRefreshing(false), 650)
+    window.dispatchEvent(new CustomEvent('smart-glasses-refresh'))
+  }
+
+  function changeAlerts(value) {
+    setAlertsEnabled(value)
+    localStorage.setItem('sg-alerts', value ? 'on' : 'off')
+  }
+
+  function changeUnits(value) {
+    setUnits(value)
+    localStorage.setItem('sg-distance-units', value)
+  }
+
+  const distance = (cm) => units === 'm' ? `${(cm / 100).toFixed(2)} m` : `${cm} cm`
 
   return (
-    <DashboardLayout status={status}>
+    <DashboardLayout status={status} page={page} pageTitle={TITLES[page]} onNavigate={setPage} onRefresh={refresh} refreshing={refreshing}>
       <div className="dashboard-main">
-      <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
-        <div><p className="mb-2 text-[10px] font-bold uppercase tracking-[1.7px] text-ash-600">Smart Glasses / Monitoring system</p><h1 className="dashboard-heading">Your overview</h1><p className="mt-2 text-sm text-ash-600">A quick read on device status, movement, and nearby obstacles.</p></div>
-        <p className="text-xs text-ash-600">{new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</p>
-      </header>
-      <div className="sample-banner mb-5 flex items-start gap-3"><FlaskConical size={17} className="mt-0.5 shrink-0"/><p><strong>Prototype preview · sample data</strong><br/>The glasses and sensors are not connected yet. Readings, movement, and device status shown here are simulated for testing, not live safety information.</p></div>
-      <DeviceLinkBanner device={device} loading={deviceLoading} error={deviceError} />
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <StatPill label="Events logged" value={String(events.length)} hint="last session" />
-        <StatPill
-          label="Danger alerts"
-          value={String(dangerCount)}
-          hint="distance under 50 cm"
-        />
-        <StatPill
-          label="Average distance"
-          value={averageDistance !== null ? `${averageDistance} cm` : '\u2014'}
-        />
-      </div>
-
-      <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          <LiveMap current={currentLocation} history={history} />
+        <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+          <div><p className="mb-1 text-[10px] font-bold uppercase tracking-[1.5px] text-ash-600">Smart Glasses / Caregiver monitoring</p><h1 className="dashboard-heading">{TITLES[page]}</h1><p className="mt-2 max-w-2xl text-sm text-ash-600">Review device status, sample obstacle readings, and recorded movement.</p></div>
+          <p className="text-xs text-ash-600">{new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</p>
         </div>
-        <div className="rounded-lg border border-line bg-white p-5 shadow-panel">
-          <h2 className="font-display text-sm font-semibold text-ash-900">Obstacle zones</h2>
-          <p className="mt-1 text-xs text-ash-600">Live reading from the three ToF sensors</p>
-          <div className="mt-2">
-            <ObstacleRadar latest={events[0]} />
-          </div>
-        </div>
-      </div>
 
-      <div className="mt-7 grid grid-cols-1 gap-5 lg:grid-cols-3">
-        <div className="lg:col-span-2"><ObstacleTimeline events={events} /></div>
-        <DeviceStatusCard status={status} />
-      </div>
-      <p className="mt-7 border-t border-line pt-4 text-[10px] leading-5 text-ash-400">Prototype data is generated locally in this browser session. Do not use these readings for navigation or emergency decisions.</p>
+        <div className="sample-banner mb-5 flex items-start gap-3"><ShieldCheck size={17} className="mt-0.5 shrink-0"/><p><strong>Prototype preview · simulated data</strong><br/>The glasses are not connected yet. Sensor readings, location, battery, and device status are sample data for interface testing, not live safety information.</p></div>
+        <DeviceLinkBanner device={device} loading={deviceLoading} error={deviceError} />
+
+        {page === 'overview' && <>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3"><StatPill label="Events logged" value={String(events.length)} hint="sample session"/><StatPill label="Close-range alerts" value={String(dangerCount)} hint="50 cm or less"/><StatPill label="Average distance" value={averageDistance !== null ? distance(averageDistance) : '—'} hint="across listed events"/></div>
+          <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3"><div className="lg:col-span-2"><LiveMap current={currentLocation} history={history}/></div><section className="rounded-lg border border-line bg-white p-5"><h2 className="font-display text-sm font-semibold text-ash-900">Obstacle direction</h2><p className="mt-1 text-xs text-ash-600">Illustrative readings from left, center, and right sensors</p><div className="mt-2"><ObstacleRadar latest={events[0]}/></div></section></div>
+          <div className="mt-6 grid grid-cols-1 gap-5 lg:grid-cols-3"><div className="lg:col-span-2"><ObstacleTimeline events={events.slice(0, 6)}/><button type="button" onClick={() => setPage('events')} className="mt-3 text-sm font-medium text-signal hover:underline">View full event log →</button></div><DeviceStatusCard status={status}/></div>
+        </>}
+
+        {page === 'location' && <><SectionHeading title="Recorded movement" description="The route below is generated from sample coordinates."/><LiveMap current={currentLocation} history={history}/><div className="mt-4 grid gap-3 sm:grid-cols-3"><StatPill label="Latitude" value={currentLocation.latitude.toFixed(5)}/><StatPill label="Longitude" value={currentLocation.longitude.toFixed(5)}/><StatPill label="Estimated speed" value={`${currentLocation.speed ?? 0} m/s`}/></div></>}
+
+        {page === 'events' && <><SectionHeading title="Sensor event history" description={`${filteredEvents.length} of ${events.length} events shown.`} action={<button type="button" onClick={() => downloadEvents(filteredEvents)} className="flex items-center gap-2 border border-line bg-white px-3 py-2 text-sm hover:bg-ash-50"><Download size={15}/>Export CSV</button>}/><div className="mb-4 flex flex-col gap-3 sm:flex-row"><label className="flex flex-1 items-center gap-2 border border-line bg-white px-3"><Search size={15} className="text-ash-400"/><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search direction, message, distance…" className="min-w-0 flex-1 py-2.5 text-sm outline-none"/></label><select value={severity} onChange={(event) => setSeverity(event.target.value)} className="border border-line bg-white px-3 py-2.5 text-sm"><option value="all">All severities</option><option value="danger">Close-range</option><option value="warning">Caution</option></select></div><ObstacleTimeline events={filteredEvents}/></>}
+
+        {page === 'device' && <><SectionHeading title="Device information" description="Connection details for the selected monitoring unit."/><div className="mb-4 flex items-center gap-3 border border-line bg-white p-5"><div className="flex h-11 w-11 items-center justify-center bg-paper"><Watch size={22}/></div><div className="min-w-0 flex-1"><h3 className="font-semibold text-ash-900">{device?.device_name || status.deviceName || 'Smart Glasses · Demo unit 01'}</h3><p className="mt-1 text-xs text-ash-600">{device?.id || status.deviceId || 'demo-glasses-001'}</p></div><span className="border border-amber-soft bg-amber-soft px-2 py-1 text-xs text-amber">Demo mode</span></div><DeviceStatusCard status={status}/><div className="mt-4"><ObstacleRadar latest={events[0]}/></div></>}
+
+        {page === 'settings' && <><SectionHeading title="Preferences" description="These preferences are saved in this browser."/><div className="max-w-2xl divide-y divide-line border-y border-line bg-white">
+          <div className="flex items-center justify-between gap-4 p-4"><div className="flex items-start gap-3"><Bell size={18} className="mt-0.5 text-ash-600"/><div><p className="text-sm font-medium text-ash-900">Alert preference</p><p className="mt-1 text-xs text-ash-600">Controls the dashboard alert preference only. It does not send push notifications.</p></div></div><button type="button" onClick={() => changeAlerts(!alertsEnabled)} aria-pressed={alertsEnabled} className="flex items-center gap-2 border border-line px-3 py-2 text-xs font-medium hover:bg-ash-50">{alertsEnabled ? <Bell size={14}/> : <BellOff size={14}/>} {alertsEnabled ? 'Enabled' : 'Muted'}</button></div>
+          <div className="flex items-center justify-between gap-4 p-4"><div><p className="text-sm font-medium text-ash-900">Distance units</p><p className="mt-1 text-xs text-ash-600">Choose how distances appear on the dashboard.</p></div><select value={units} onChange={(event) => changeUnits(event.target.value)} className="border border-line bg-white px-3 py-2 text-sm"><option value="cm">Centimeters</option><option value="m">Meters</option></select></div>
+          <div className="flex items-center justify-between gap-4 p-4"><div><p className="text-sm font-medium text-ash-900">Sample data updates</p><p className="mt-1 text-xs text-ash-600">The demo feed currently refreshes automatically when available.</p></div><span className="border border-amber-soft bg-amber-soft px-2 py-1 text-xs text-amber">Simulated</span></div>
+          <div className="flex items-center justify-between gap-4 p-4"><div><p className="text-sm font-medium text-ash-900">Restore preferences</p><p className="mt-1 text-xs text-ash-600">Return dashboard preferences to their defaults.</p></div><button type="button" onClick={() => { changeAlerts(true); changeUnits('cm'); setQuery(''); setSeverity('all') }} className="flex items-center gap-2 border border-line px-3 py-2 text-xs font-medium hover:bg-ash-50"><RotateCcw size={14}/>Reset</button></div>
+        </div><p className="mt-4 flex items-center gap-2 text-xs text-ash-600"><Settings2 size={14}/>Account authentication is managed by Supabase. Hardware pairing is not available until device firmware and registration are implemented.</p></>}
+        <p className="mt-7 border-t border-line pt-4 text-[10px] leading-5 text-ash-400">Sample data is for prototype testing only. Do not use these readings for navigation, emergency response, or safety decisions.</p>
       </div>
     </DashboardLayout>
   )

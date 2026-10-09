@@ -65,10 +65,13 @@ export function useTelemetry() {
     }
 
     loadTelemetry()
+    const handleRefresh = () => loadTelemetry()
+    window.addEventListener('smart-glasses-refresh', handleRefresh)
     const interval = setInterval(loadTelemetry, 15000)
     return () => {
       cancelled = true
       controller.abort()
+      window.removeEventListener('smart-glasses-refresh', handleRefresh)
       clearInterval(interval)
     }
   }, [])
