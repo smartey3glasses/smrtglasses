@@ -1,16 +1,6 @@
 {
-    "frontend": {
-      "root": "frontend",
-      "framework": "vite"
-    }
-  },
-  "rewrites": [
-    },
-    {
-      "source": "/(.*)",
-      "destination": {
-        "service": "frontend"
-      }
-    }
-  ]
+"framework": "vite",
+"buildCommand": "npm run build",
+"outputDirectory": "dist",
+"installCommand": "npm install"
 }
