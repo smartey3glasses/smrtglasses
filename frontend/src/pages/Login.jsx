@@ -5,7 +5,6 @@ import { useAuth } from '@/context/AuthContext'
 const ROLE_OPTIONS = [
   { value: 'family_member', label: 'Family member' },
   { value: 'caregiver', label: 'Caregiver' },
-  { value: 'visually_impaired_user', label: 'Device wearer' },
 ]
 
 export default function Login() {
@@ -98,13 +97,13 @@ export default function Login() {
 
         <div className="story-copy">
           <p className="kicker"><span className="live-dot" /> Caregiver device monitor</p>
-          <h1>Stay informed<br />about the <em>wearer.</em></h1>
+          <h1>Stay close to<br />what <em>matters.</em></h1>
           <p className="story-description">
             Check device status, location, and obstacle alerts from one place.
           </p>
           <div className="story-line">
             <span>01</span>
-            <span>Useful updates, when you need them.</span>
+            <span>Device status and sensor activity, in one place.</span>
             <MoveRight size={18} />
           </div>
         </div>
@@ -208,14 +207,23 @@ export default function Login() {
             </label>
 
             {mode === 'signup' && (
-              <label>
-                Account type
-                <select value={role} onChange={(event) => setRole(event.target.value)}>
+              <fieldset className="role-picker">
+                <legend>Account type</legend>
+                <div className="role-options">
                   {ROLE_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>{option.label}</option>
+                    <button
+                      key={option.value}
+                      type="button"
+                      className={`role-option ${role === option.value ? 'is-selected' : ''}`}
+                      aria-pressed={role === option.value}
+                      onClick={() => setRole(option.value)}
+                    >
+                      <span className="role-option-mark" aria-hidden="true">{role === option.value ? '✓' : ''}</span>
+                      <span>{option.label}</span>
+                    </button>
                   ))}
-                </select>
-              </label>
+                </div>
+              </fieldset>
             )}
 
             {mode === 'signin' && (

@@ -2,7 +2,7 @@ create table if not exists profiles (
   id uuid primary key references auth.users (id) on delete cascade,
   name text not null,
   email text not null,
-  role text not null default 'family_member' check (role in ('visually_impaired_user', 'family_member', 'caregiver', 'admin')),
+  role text not null default 'family_member' check (role in ('family_member', 'caregiver', 'admin')),
   created_at timestamptz not null default now()
 );
 
@@ -153,7 +153,7 @@ begin
     new.id,
     coalesce(nullif(new.raw_user_meta_data ->> 'name', ''), split_part(coalesce(new.email, 'user'), '@', 1)),
     coalesce(new.email, ''),
-    case when new.raw_user_meta_data ->> 'role' in ('family_member', 'caregiver', 'visually_impaired_user')
+    case when new.raw_user_meta_data ->> 'role' in ('family_member', 'caregiver')
       then new.raw_user_meta_data ->> 'role' else 'family_member' end
   )
   on conflict (id) do update set

@@ -34,7 +34,7 @@ export function AuthProvider({ children }) {
       if (data) { if (active) setProfile(data); return }
       const { data: created, error: createError } = await supabase.from('profiles').upsert({
         id: user.id, name: meta.name || user.email?.split('@')[0] || 'User', email: user.email || '',
-        role: ['family_member', 'caregiver', 'visually_impaired_user', 'admin'].includes(meta.role) ? meta.role : 'family_member'
+        role: ['family_member', 'caregiver', 'admin'].includes(meta.role) ? meta.role : 'family_member'
       }).select().maybeSingle()
       if (createError) console.error('Profile setup failed:', createError.message)
       if (active && created) setProfile(created)

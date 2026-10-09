@@ -1,11 +1,13 @@
-import { Activity, Compass, History, LayoutGrid, LogOut, Settings2, Watch } from 'lucide-react'
+import { Activity, BellRing, Compass, FileBarChart, History, LayoutGrid, LogOut, Settings2, Watch } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 
 const NAV_ITEMS = [
   { id: 'overview', label: 'Overview', icon: LayoutGrid },
   { id: 'location', label: 'Location', icon: Compass },
   { id: 'events', label: 'Event log', icon: History },
+  { id: 'alerts', label: 'Alerts', icon: BellRing },
   { id: 'device', label: 'Device status', icon: Watch },
+  { id: 'reports', label: 'Reports', icon: FileBarChart },
   { id: 'settings', label: 'Settings', icon: Settings2 }
 ]
 
