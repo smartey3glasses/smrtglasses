@@ -61,8 +61,7 @@ export default function Login() {
     <section className="auth-story" aria-label="Smart Glasses Monitoring System">
       <header className="brand-lockup"><span className="brand-mark"><Glasses size={23} strokeWidth={1.8}/></span><span><strong>Smart Glasses</strong><small>CAREGIVER MONITORING SYSTEM</small></span></header>
       <div className="story-copy"><p className="kicker"><span className="live-dot"/> Caregiver device monitor</p><h1>Stay informed<br/>about the <em>wearer.</em></h1><p className="story-description">A monitoring system for caregivers to review obstacle alerts, wearer location, and smart-glasses status.</p><div className="story-line"><span>01</span><span>Awareness, without getting in the way.</span><MoveRight size={18}/></div></div>
-      <div className="illustration" aria-hidden="true"><div className="orbit orbit-one"/><div className="orbit orbit-two"/><div className="lens lens-left"/><div className="bridge"/><div className="lens lens-right"/><span className="coordinate coordinate-a">14°35′ N</span><span className="coordinate coordinate-b">121°00′ E</span><span className="illustration-caption">SAMPLE DEVICE / UNIT 001</span></div>
-      <footer className="story-footer"><span>FOR CAREGIVER MONITORING</span><span>PH · 2026</span></footer>
+      <div className="illustration" aria-hidden="true"><div className="orbit orbit-one"/><div className="orbit orbit-two"/><div className="lens lens-left"/><div className="bridge"/><div className="lens lens-right"/><span className="coordinate coordinate-a">14°35′ N</span><span className="coordinate coordinate-b">121°00′ E</span><span className="illustration-caption">DEVICE / UNIT 001</span></div>
     </section>
     <section className="auth-panel"><div className="auth-mobile-brand"><span className="brand-mark"><Glasses size={22}/></span><strong>Smart Glasses</strong></div><div className="auth-form-wrap">
       <div className="form-heading"><p className="kicker">CAREGIVER MONITORING SYSTEM</p><h2>{mode === 'signin' ? 'Welcome back.' : 'Let’s get started.'}</h2><p>{mode === 'signin' ? 'Sign in to see what’s happening with your device.' : 'Create an account to monitor your connected smart glasses.'}</p></div>
@@ -77,7 +76,6 @@ export default function Login() {
         <button className="submit-button" type="submit" disabled={submitting}>{submitting?<LoaderCircle size={17} className="spin"/>: <>{mode==='signin'?'Sign in to the monitoring system':'Create my account'} <ArrowUpRight size={17}/></>}</button>
       </form>
       <p className="privacy-note"><ShieldCheck size={16}/> Your account and device information are private.</p>
-      <p className="auth-footnote">No glasses connected yet? That’s okay. The dashboard can be explored with clearly labelled sample readings until your hardware is ready.</p>
-    </div><footer className="panel-footer"><span>SMART GLASSES · MONITORING SYSTEM</span><span>ACCESS SECURED <span className="tiny-dot"/></span></footer></section>
+    </div><footer className="panel-footer"><span> meow:3 </span></section>
   </main>
 }
