@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Eyeglasses | Caregiver Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+  <script src="https://code.iconify.design/iconify-icon/3.0.3/iconify-icon.min.js"></script>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="logoutModal" class="confirm-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="logoutTitle">
+    <div class="confirm-sheet">
+      <div class="confirm-icon"><iconify-icon icon="solar:logout-2-linear"></iconify-icon></div>
+      <span class="panel-kicker">ACCOUNT</span>
+      <h3 id="logoutTitle">Sign out?</h3>
+      <p id="logoutMessage">Are you sure you want to sign out of the caregiver dashboard?</p>
+      <div class="confirm-actions">
+        <button id="cancelLogout" class="secondary-btn">Cancel</button>
+        <button id="confirmLogout" class="danger-btn">Sign out</button>
+      </div>
+    </div>
+  </div>
+
+<div id="toast" class="toast"></div>
+
+  <section id="loginView" class="login-view">
+    <div class="login-panel">
+      <div class="brand-mark logo-mark"><img src="smart-glasses-logo.svg" alt="Smart Eyeglasses" /></div>
+      <div class="eyebrow">CAREGIVER MONITORING</div>
+      <h1>Smart Eyeglasses<br><span>Care Dashboard</span></h1>
+      <p class="login-copy">A simple way to check your relative's location, connection, and recent obstacle alerts.</p>
+      <form id="loginForm" class="login-form">
+        <label>Email<input id="emailInput" type="email" placeholder="caregiver@example.com" required /></label>
+        <label>Password<input id="passwordInput" type="password" placeholder="••••••••" required /></label>
+        <button class="primary-btn" type="submit">Sign in <span><iconify-icon icon="solar:arrow-right-linear"></iconify-icon></span></button>
+      </form>
+      <button id="demoBtn" class="ghost-btn"><iconify-icon icon="solar:play-circle-linear"></iconify-icon> View demo</button>
+      <p id="authHint" class="small-note">Demo mode uses sample data. Connect Supabase in <code>config.js</code> for live records.</p>
+    </div>
+    <div class="login-visual">
+      <div class="visual-grid"></div>
+      <div class="visual-card vc-main"><span class="pulse"></span><b>CONNECTED</b><strong>MARIA'S GLASSES</strong><small>Last update · just now</small></div>
+      <div class="visual-card vc-event"><small>Recent alert</small><b>Obstacle detected</b><span>Ahead · 1.2 m</span></div>
+      <div class="visual-card vc-location"><small>Current location</small><b>Location available</b><span>Updated just now</span></div>
+    </div>
+  </section>
+
+  <div id="appView" class="app-shell hidden">
+    <aside class="sidebar">
+      <div class="sidebar-brand"><div class="brand-mark small logo-mark"><img src="smart-glasses-logo.svg" alt="Smart Eyeglasses" /></div><div><b>Smart Eyeglasses</b><span>Care Dashboard</span></div></div>
+      <div class="workspace-label">MONITOR</div>
+      <nav>
+        <button class="nav-item active" data-section="overview"><span><iconify-icon icon="solar:home-2-linear"></iconify-icon></span> Home</button>
+        <button class="nav-item" data-section="location"><span><iconify-icon icon="solar:map-point-linear"></iconify-icon></span> Location</button>
+        <button class="nav-item" data-section="events"><span><iconify-icon icon="solar:danger-triangle-linear"></iconify-icon></span> Alerts</button>
+        <button class="nav-item" data-section="devices"><span><iconify-icon icon="solar:glasses-linear"></iconify-icon></span> Smart Glasses</button>
+      </nav>
+      <div class="workspace-label secondary-label">ACCOUNT</div>
+      <nav>
+        <button class="nav-item" data-section="access"><span><iconify-icon icon="solar:users-group-rounded-linear"></iconify-icon></span> Family Access</button>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="connection-card"><span class="status-dot"></span><div><b id="connectionLabel">Demo mode</b><small id="connectionSub">Sample data</small></div></div>
+        <button id="logoutBtn" class="logout-btn"><iconify-icon icon="solar:logout-2-linear"></iconify-icon> Sign out</button>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div><span class="page-kicker">CAREGIVER DASHBOARD</span><h2 id="pageTitle">Home</h2></div>
+        <div class="top-actions"><span id="lastSync">Updated just now</span><button id="refreshBtn" class="icon-btn" title="Refresh"><iconify-icon icon="solar:refresh-linear"></iconify-icon></button><button id="profileBtn" class="avatar" title="Profile" aria-label="Profile"><iconify-icon icon="solar:user-linear"></iconify-icon></button></div>
+      </header>
+
+      <section id="overview" class="page-section active-section">
+        <div class="hero-row caregiver-hero">
+          <div><p class="muted">Good afternoon</p><h3><span id="userName">Caregiver</span>, here's how things look.</h3><p class="hero-copy">Check your relative's connection, current location, and recent alerts in one place.</p></div>
+          <div class="person-status"><span class="status-dot"></span><div><b id="relativeName">Maria</b><small id="relativeStatus">Connected · updated just now</small></div></div>
+        </div>
+
+        <div class="care-stats">
+          <button class="care-card" data-section-jump="location"><div class="stat-icon blue"><iconify-icon icon="solar:map-point-linear"></iconify-icon></div><span>Current location</span><strong>Available</strong><small>Updated <span id="locationAgo">just now</span></small><em>View map <iconify-icon icon="solar:arrow-right-linear"></iconify-icon></em></button>
+          <button class="care-card" data-section-jump="events"><div class="stat-icon red"><iconify-icon icon="solar:danger-triangle-linear"></iconify-icon></div><span>Alerts today</span><strong id="todayEvents">4</strong><small id="eventTrend">Latest alert 2 min ago</small><em>View alerts <iconify-icon icon="solar:arrow-right-linear"></iconify-icon></em></button>
+          <button class="care-card" data-section-jump="devices"><div class="stat-icon green"><iconify-icon icon="solar:shield-check-linear"></iconify-icon></div><span>Smart glasses</span><strong id="deviceStatus">Connected</strong><small id="deviceStatusMeta">Last update just now</small><em>View details <iconify-icon icon="solar:arrow-right-linear"></iconify-icon></em></button>
+        </div>
+
+        <div class="content-grid two-col home-grid">
+          <div class="panel"><div class="panel-head"><div><span class="panel-kicker">WHERE THEY ARE</span><h4>Current location</h4></div><button class="text-btn" data-section-jump="location">Open map <iconify-icon icon="solar:arrow-right-linear"></iconify-icon></button></div><div class="location-snapshot"><div id="miniMap" class="mini-map"></div><div class="map-caption"><div><span>Last update</span><b id="miniLocationTime">Just now</b></div><button id="homeMapsBtn" class="secondary-btn">Open in Maps ↗</button></div></div></div>
+          <div class="panel"><div class="panel-head"><div><span class="panel-kicker">WHAT HAPPENED</span><h4>Recent alerts</h4></div><button class="text-btn" data-section-jump="events">View all <iconify-icon icon="solar:arrow-right-linear"></iconify-icon></button></div><div id="recentEvents" class="event-list"></div></div>
+        </div>
+      </section>
+
+      <section id="location" class="page-section">
+        <div class="section-heading"><div><span class="panel-kicker">CURRENT LOCATION</span><h3>Where are they?</h3><p>See the latest location reported by the Smart Eyeglasses.</p></div><span class="chip green-chip">Location available</span></div>
+        <div class="location-grid"><div class="panel map-panel"><div id="mainMap" class="main-map"></div></div><div class="panel location-detail"><span class="panel-kicker">LATEST UPDATE</span><h4 id="locationTime">Just now</h4><div class="location-friendly"><iconify-icon icon="solar:map-point-wave-linear"></iconify-icon><div><strong>Current location is available</strong><span id="locationSummary">The glasses recently reported a position.</span></div></div><div class="detail-list"><div><span>Accuracy</span><b id="locationAccuracy">About 5 m</b></div><div><span>Last update</span><b id="locationUpdated">Just now</b></div><div><span>Device</span><b id="locationDevice">Maria's glasses</b></div></div><button id="openMapsBtn" class="primary-btn full">Open in Google Maps ↗</button><button id="showCoordinatesBtn" class="link-btn">Show exact coordinates</button><div id="coordinatesBox" class="coordinates-box hidden"><span>Latitude</span><b id="detailLat">14.1542° N</b><span>Longitude</span><b id="detailLng">123.7336° E</b></div></div></div>
+        <div class="panel history-panel"><div class="panel-head"><div><span class="panel-kicker">RECENT MOVEMENT</span><h4>Location history</h4></div></div><div id="locationHistory" class="table-wrap"></div></div>
+      </section>
+
+      <section id="events" class="page-section">
+        <div class="section-heading"><div><span class="panel-kicker">RECENT ALERTS</span><h3>Obstacle alerts</h3><p>See when the glasses detected an obstacle while your relative was walking.</p></div></div>
+        <div class="alert-summary"><div><span>Alerts today</span><strong id="alertsTotal">4</strong></div><div><span>Latest alert</span><strong id="latestAlertText">2 min ago</strong></div></div>
+        <div class="filter-row"><input id="eventSearch" class="search-input" placeholder="Search alerts…" /><select id="severityFilter"><option value="all">All alerts</option><option value="High">More urgent</option><option value="Medium">Moderate</option><option value="Low">Less urgent</option></select><button id="clearFilterBtn" class="secondary-btn">Reset</button></div>
+        <div class="panel table-panel"><div id="eventsTable" class="table-wrap"></div></div>
+        <p class="plain-note"><iconify-icon icon="solar:info-circle-linear"></iconify-icon> Alerts show what the glasses detected. They do not identify people or objects.</p>
+      </section>
+
+      <section id="devices" class="page-section">
+        <div class="section-heading"><div><span class="panel-kicker">SMART GLASSES</span><h3>How are the glasses doing?</h3><p>A simple status view of the device. Technical details are available below for reference.</p></div></div>
+        <div id="deviceCards" class="device-grid"></div>
+        <div class="panel technical-panel"><div class="panel-head"><div><span class="panel-kicker">DEVICE DETAILS</span><h4>Technical information</h4></div><button id="technicalToggle" class="text-btn">Hide details</button></div><div id="technicalDetails" class="technical-details"><div><span>Controller</span><b>ESP32 DevKit V1</b></div><div><span>Obstacle sensors</span><b>3 × VL53L0X</b></div><div><span>Location</span><b>NEO-6M GPS</b></div><div><span>Audio</span><b>VV4 bone-conduction headset</b></div><div><span>Battery</span><b>2000 mAh rechargeable</b></div><div><span>Connection</span><b id="technicalConnection">Connected</b></div></div></div>
+      </section>
+
+      <section id="access" class="page-section">
+        <div class="section-heading"><div><span class="panel-kicker">FAMILY ACCESS</span><h3>Who can view this?</h3><p>Manage the family members or caregivers who can see the location and alerts.</p></div><button class="primary-btn compact" id="addAccessBtn"><iconify-icon icon="solar:user-plus-linear"></iconify-icon> Add family member</button></div>
+        <div class="panel"><div class="access-summary"><div><span>People with access</span><strong id="accessCount">2</strong></div><div><span>What they can see</span><strong>Location & alerts</strong></div><div><span>Device</span><strong id="accessDeviceName">Maria's glasses</strong></div></div><div id="accessTable" class="table-wrap"></div></div>
+      </section>
+    </main>
+  </div>
+  <script src="config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <script src="app.js"></script>
+
+
+  <!-- Profile / settings popover -->
+  <div id="profileMenu" class="profile-menu hidden" role="dialog" aria-label="Profile menu">
+    <div class="profile-card-head">
+      <div class="profile-avatar"><iconify-icon icon="solar:user-linear"></iconify-icon></div>
+      <div><b id="profileName">Caregiver</b><small id="profileEmail">caregiver@example.com</small></div>
+    </div>
+    <div class="profile-divider"></div>
+    <button class="profile-action" id="settingsBtn"><iconify-icon icon="solar:settings-linear"></iconify-icon><span>Settings</span><iconify-icon class="chev" icon="solar:alt-arrow-right-linear"></iconify-icon></button>
+    <button class="profile-action danger" id="profileLogoutBtn"><iconify-icon icon="solar:logout-2-linear"></iconify-icon><span>Sign out</span></button>
+  </div>
+
+  <div id="settingsPanel" class="settings-overlay hidden">
+    <div class="settings-sheet" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+      <div class="settings-head"><div><span class="panel-kicker">PREFERENCES</span><h3 id="settingsTitle">Settings</h3></div><button id="closeSettings" class="icon-btn" aria-label="Close settings"><iconify-icon icon="solar:close-circle-linear"></iconify-icon></button></div>
+      <div class="settings-section">
+        <span class="settings-label">Appearance</span>
+        <div class="setting-row"><div><b>Theme</b><small>Choose how the dashboard looks.</small></div><div class="segmented" id="themeControl"><button data-theme="light">Light</button><button data-theme="dark">Dark</button></div></div>
+      </div>
+      <div class="settings-section">
+        <span class="settings-label">Language / Wika</span>
+        <div class="setting-row"><div><b>Language</b><small>English or Filipino.</small></div><div class="segmented" id="languageControl"><button data-lang="en">English</button><button data-lang="fil">Filipino</button></div></div>
+      </div>
+      <div class="settings-note"><iconify-icon icon="solar:info-circle-linear"></iconify-icon><span>Language changes the caregiver-facing labels and controls. Device technical terms stay in their original names.</span></div>
+    </div>
+  </div>
+
+</body>
+</html>
