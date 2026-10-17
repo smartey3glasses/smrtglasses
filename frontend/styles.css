@@ -408,4 +408,267 @@ body{background:radial-gradient(circle at 20% -10%,#ffffff 0,#edf5f1 34%,#dce9e3
 .profile-card-head{display:flex;align-items:center;gap:11px;padding:7px 6px 10px}.profile-card-head b{display:block;font-size:12px}.profile-card-head small{display:block;color:#7b8a84;font-size:9px;margin-top:3px}.profile-avatar{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(145deg,#e8faf2,#b9dfcf);color:#285448;box-shadow:inset 2px 2px 4px #fff,inset -2px -2px 4px rgba(39,90,73,.14);font-size:19px}.profile-divider{height:1px;background:#dfeae5;margin:3px 0 7px}.profile-action{width:100%;border:0;background:transparent;border-radius:11px;padding:10px 8px;display:flex;align-items:center;gap:10px;color:#31463f;text-align:left;font-size:11px}.profile-action:hover{background:#edf5f1}.profile-action .chev{margin-left:auto;color:#91a19b}.profile-action.danger{color:#a94e49}.profile-action.danger:hover{background:#faeeec}.settings-overlay{position:fixed;inset:0;background:rgba(20,42,35,.28);backdrop-filter:blur(4px);z-index:4000;display:grid;place-items:center;padding:20px}.settings-sheet{width:min(500px,100%);border:1px solid rgba(151,183,171,.55);border-radius:24px;background:#f8fcfa;box-shadow:0 25px 70px rgba(17,47,38,.28),inset 1px 1px 0 #fff;padding:22px}.settings-head{display:flex;align-items:flex-start;justify-content:space-between;border-bottom:1px solid #dce8e3;padding-bottom:15px;margin-bottom:4px}.settings-head h3{font-size:22px;margin:5px 0 0}.settings-section{padding:17px 0;border-bottom:1px solid #e2ebe7}.settings-label{display:block;color:#71817a;font-size:9px;font-weight:700;letter-spacing:.13em;margin-bottom:10px}.setting-row{display:flex;align-items:center;justify-content:space-between;gap:18px}.setting-row b{display:block;font-size:12px}.setting-row small{display:block;color:#81908a;font-size:9px;margin-top:4px}.segmented{display:flex;padding:3px;border-radius:12px;background:#e7f0ec;box-shadow:inset 2px 2px 5px rgba(42,77,65,.10),inset -1px -1px 2px #fff}.segmented button{border:0;background:transparent;border-radius:9px;padding:8px 10px;font-size:9px;color:#71817a}.segmented button.active{background:#fff;color:#21483e;font-weight:700;box-shadow:0 2px 7px rgba(25,57,47,.10),inset 1px 1px 0 #fff}.settings-note{display:flex;gap:8px;align-items:flex-start;margin-top:16px;padding:11px;border-radius:12px;background:#edf5f1;color:#71817a;font-size:9px;line-height:1.5}.settings-note iconify-icon{font-size:16px;color:#4f9c7b;flex:none}
 .confirm-overlay{position:fixed;inset:0;background:rgba(20,42,35,.34);backdrop-filter:blur(5px);z-index:12000;display:grid;place-items:center;padding:20px}.confirm-sheet{width:min(380px,100%);padding:24px;border:1px solid rgba(151,183,171,.55);border-radius:24px;background:#f8fcfa;box-shadow:0 25px 70px rgba(17,47,38,.28),inset 1px 1px 0 #fff;text-align:left}.confirm-icon{width:48px;height:48px;border-radius:15px;display:grid;place-items:center;background:linear-gradient(145deg,#fff0ef,#f2d1cf);color:#a94e49;box-shadow:inset 2px 2px 4px #fff,inset -2px -2px 4px rgba(169,78,73,.12);font-size:21px;margin-bottom:14px}.confirm-sheet h3{font-size:22px;margin:5px 0 7px}.confirm-sheet p{color:#71817a;font-size:11px;line-height:1.55;margin:0 0 20px}.confirm-actions{display:flex;justify-content:flex-end;gap:9px}.danger-btn{border:1px solid rgba(169,78,73,.22);border-radius:12px;padding:10px 14px;background:linear-gradient(145deg,#fff4f3,#efd6d4);color:#9f4c47;font-weight:700;font-size:10px;box-shadow:2px 2px 5px rgba(80,40,36,.10),inset 1px 1px 0 #fff}.danger-btn:active{transform:translateY(1px);box-shadow:inset 2px 2px 4px rgba(80,40,36,.10)}
 body.dark-mode{background:#15241f;color:#e6f0ec}body.dark-mode .main-content{background:#15241f}body.dark-mode .topbar{color:#e6f0ec}body.dark-mode .panel,body.dark-mode .care-card,body.dark-mode .person-status,body.dark-mode .device-card,body.dark-mode .alert-summary div{background:#1c3029;border-color:#304940;color:#e6f0ec;box-shadow:0 8px 22px rgba(0,0,0,.16)}body.dark-mode .muted,body.dark-mode .hero-copy,body.dark-mode .section-heading p,body.dark-mode .care-card span,body.dark-mode .care-card small,body.dark-mode .device-type,body.dark-mode .technical-details span,body.dark-mode .detail-list span,body.dark-mode .location-friendly span{color:#9db0a8}body.dark-mode .topbar:after{background:#41675a}body.dark-mode .technical-details div,body.dark-mode .coordinates-box,body.dark-mode .location-friendly{background:#20372f}body.dark-mode .data-table td{background:#1c3029;border-bottom-color:#2a433a}body.dark-mode .data-table th{background:#20372f;color:#a9bbb4;border-bottom-color:#304940}body.dark-mode .icon-btn,body.dark-mode .avatar{background:#1c3029;border-color:#304940;color:#e6f0ec}body.dark-mode .profile-menu,body.dark-mode .settings-sheet{background:#1b3028;color:#e6f0ec;border-color:#385247}body.dark-mode .profile-divider,body.dark-mode .settings-head,body.dark-mode .settings-section{border-color:#304940}body.dark-mode .profile-action{color:#dce9e4}body.dark-mode .profile-action:hover{background:#253f35}body.dark-mode .segmented{background:#14251f}body.dark-mode .segmented button{color:#9db0a8}body.dark-mode .segmented button.active{background:#29473c;color:#e6f0ec}body.dark-mode .settings-note{background:#20372f;color:#9db0a8}body.dark-mode .settings-overlay{background:rgba(3,13,10,.58)}
-@media(max-width:650px){.profile-menu{top:auto;right:14px;bottom:98px;width:230px}.settings-overlay{align-items:end;padding:0}.settings-sheet{width:100%;border-radius:24px 24px 0 0;padding:20px 17px 24px}.setting-row{align-items:flex-end}.top-actions{position:relative}.avatar{display:grid}.settings-head h3{font-size:20px}.confirm-overlay{align-items:end;padding:0}.confirm-sheet{width:100%;border-radius:24px 24px 0 0;padding:22px 18px 26px}}
+@media(max-width:650px){.profile-menu{top:78px;right:14px;bottom:auto;width:230px}.settings-overlay{align-items:end;padding:0}.settings-sheet{width:100%;border-radius:24px 24px 0 0;padding:20px 17px 24px}.setting-row{align-items:flex-end}.top-actions{position:relative}.avatar{display:grid}.settings-head h3{font-size:20px}.confirm-overlay{align-items:end;padding:0}.confirm-sheet{width:100%;border-radius:24px 24px 0 0;padding:22px 18px 26px}}
+
+/* =========================================================
+   DARK MODE v2 — high-contrast forest / graphite theme
+   Designed for comfortable mobile readability.
+   ========================================================= */
+body.dark-mode{
+  color-scheme:dark;
+  --dark-bg:#0d1714;
+  --dark-surface:#14231e;
+  --dark-surface-2:#192b25;
+  --dark-surface-3:#20362e;
+  --dark-line:#31483f;
+  --dark-line-soft:#273d35;
+  --dark-text:#f1faf6;
+  --dark-muted:#a8bbb3;
+  --dark-subtle:#849a91;
+  --dark-mint:#8fe0c1;
+  background:#0d1714 !important;
+  color:var(--dark-text) !important;
+}
+
+body.dark-mode .app-shell,
+body.dark-mode .main-content{background:#0d1714 !important}
+
+/* Kill light-mode embossing that creates the fuzzy/outlined text seen in dark mode. */
+body.dark-mode .topbar h2,
+body.dark-mode .section-heading h3,
+body.dark-mode .caregiver-hero h3{
+  color:var(--dark-text) !important;
+  text-shadow:none !important;
+}
+
+body.dark-mode .page-kicker,
+body.dark-mode .panel-kicker,
+body.dark-mode .eyebrow,
+body.dark-mode .workspace-label{
+  color:#91aaa1 !important;
+}
+
+body.dark-mode .top-actions,
+body.dark-mode .muted,
+body.dark-mode .hero-copy,
+body.dark-mode .section-heading p,
+body.dark-mode .care-card span,
+body.dark-mode .care-card small,
+body.dark-mode .event-item span,
+body.dark-mode .map-caption span,
+body.dark-mode .device-type,
+body.dark-mode .technical-details span,
+body.dark-mode .detail-list span,
+body.dark-mode .location-friendly span,
+body.dark-mode .alert-summary span,
+body.dark-mode .plain-note,
+body.dark-mode .settings-label,
+body.dark-mode .setting-row small,
+body.dark-mode .profile-card-head small{
+  color:var(--dark-muted) !important;
+}
+
+body.dark-mode .care-card strong,
+body.dark-mode .care-card em,
+body.dark-mode .panel-head h4,
+body.dark-mode .event-item b,
+body.dark-mode .map-caption b,
+body.dark-mode .location-detail h4,
+body.dark-mode .detail-list b,
+body.dark-mode .coordinates-box b,
+body.dark-mode .device-id,
+body.dark-mode .device-specs b,
+body.dark-mode .technical-details b,
+body.dark-mode .access-summary strong,
+body.dark-mode .alert-summary strong,
+body.dark-mode .location-friendly strong{
+  color:var(--dark-text) !important;
+}
+
+/* Premium dark surfaces: clear separation without losing the tactile feel. */
+body.dark-mode .panel,
+body.dark-mode .care-card,
+body.dark-mode .person-status,
+body.dark-mode .device-card,
+body.dark-mode .alert-summary div{
+  background:linear-gradient(145deg,#1a2d26 0%,#14231e 62%,#11201b 100%) !important;
+  border:1px solid var(--dark-line) !important;
+  box-shadow:8px 10px 24px rgba(0,0,0,.28),inset 1px 1px 0 rgba(255,255,255,.045) !important;
+}
+
+body.dark-mode .panel:before,
+body.dark-mode .care-card:before,
+body.dark-mode .device-card:before,
+body.dark-mode .person-status:before{
+  background:linear-gradient(90deg,transparent,rgba(205,240,226,.16),transparent) !important;
+}
+
+body.dark-mode .care-card:hover{
+  border-color:#46665a !important;
+  box-shadow:10px 14px 28px rgba(0,0,0,.34),inset 1px 1px 0 rgba(255,255,255,.05) !important;
+}
+
+/* Controls */
+body.dark-mode .icon-btn,
+body.dark-mode .avatar,
+body.dark-mode .secondary-btn,
+body.dark-mode .ghost-btn,
+body.dark-mode .action-btn{
+  background:linear-gradient(145deg,#20362e,#172820) !important;
+  border:1px solid #3a554a !important;
+  color:var(--dark-text) !important;
+  box-shadow:4px 6px 13px rgba(0,0,0,.24),inset 1px 1px 0 rgba(255,255,255,.05) !important;
+}
+body.dark-mode .icon-btn:hover,
+body.dark-mode .avatar:hover,
+body.dark-mode .secondary-btn:hover,
+body.dark-mode .ghost-btn:hover,
+body.dark-mode .action-btn:hover{
+  background:#284238 !important;
+  border-color:#4b6c5e !important;
+}
+body.dark-mode .primary-btn{
+  background:linear-gradient(145deg,#4d9b7b,#2c6a54) !important;
+  border-color:#5fb58f !important;
+  color:#f5fffb !important;
+}
+body.dark-mode .text-btn,
+body.dark-mode .link-btn{
+  color:#a8d9c6 !important;
+}
+body.dark-mode .text-btn:hover,
+body.dark-mode .link-btn:hover{
+  color:#d7f7e9 !important;
+}
+
+/* Search/filter controls were still white in the old dark mode. */
+body.dark-mode .search-input,
+body.dark-mode select,
+body.dark-mode .login-form input{
+  background:#101d19 !important;
+  color:var(--dark-text) !important;
+  border:1px solid #3a554a !important;
+  box-shadow:inset 2px 2px 5px rgba(0,0,0,.28),inset -1px -1px 2px rgba(255,255,255,.025) !important;
+}
+body.dark-mode .search-input::placeholder{color:#71877e !important}
+body.dark-mode select option{background:#14231e;color:#f1faf6}
+
+/* Status chips and severity badges. */
+body.dark-mode .chip,
+body.dark-mode .live-badge,
+body.dark-mode .severity{
+  background:#263b33 !important;
+  border:1px solid #3a554a !important;
+  color:#c5d9d1 !important;
+  box-shadow:inset 1px 1px 2px rgba(255,255,255,.035) !important;
+}
+body.dark-mode .green-chip,
+body.dark-mode .severity.low{
+  background:#1d4034 !important;
+  border-color:#386b58 !important;
+  color:#a8e6cc !important;
+}
+body.dark-mode .severity.high{
+  background:#4a2928 !important;
+  border-color:#70413e !important;
+  color:#ffc1ba !important;
+}
+body.dark-mode .severity.medium{
+  background:#463820 !important;
+  border-color:#68552e !important;
+  color:#f4d18b !important;
+}
+
+/* Location page / information blocks. */
+body.dark-mode .location-friendly,
+body.dark-mode .coordinates-box,
+body.dark-mode .technical-details div{
+  background:linear-gradient(145deg,#20372f,#192b25) !important;
+  border:1px solid #365248 !important;
+  color:var(--dark-text) !important;
+  box-shadow:inset 2px 2px 5px rgba(0,0,0,.22),inset -1px -1px 2px rgba(255,255,255,.025) !important;
+}
+body.dark-mode .detail-list div{border-bottom-color:var(--dark-line-soft) !important}
+body.dark-mode .device-top{border-bottom-color:var(--dark-line) !important}
+body.dark-mode .device-specs div{border-right-color:var(--dark-line-soft) !important}
+body.dark-mode .access-summary{background:linear-gradient(145deg,#1d342b,#172820) !important;border-color:#365248 !important;box-shadow:inset 2px 2px 5px rgba(0,0,0,.2) !important}
+body.dark-mode .access-summary div{border-color:var(--dark-line-soft) !important}
+body.dark-mode .event-item{border-bottom-color:var(--dark-line-soft) !important}
+body.dark-mode .event-icon{background:#402827 !important;color:#ffaaa2 !important}
+
+/* Tables: keep rows distinct and readable. */
+body.dark-mode .data-table{background:#111e1a !important}
+body.dark-mode .data-table th{
+  background:#20372f !important;
+  color:#b7cbc2 !important;
+  border-bottom-color:#3a554a !important;
+}
+body.dark-mode .data-table td{
+  background:#172820 !important;
+  color:#e5f1ec !important;
+  border-bottom-color:#2a4037 !important;
+}
+body.dark-mode .data-table tbody tr:hover td{background:#213a31 !important}
+
+/* Map housing should feel inset, while the actual Leaflet map stays naturally legible. */
+body.dark-mode .mini-map,
+body.dark-mode .main-map{
+  border-color:#30483f !important;
+  box-shadow:inset 2px 2px 8px rgba(0,0,0,.35),0 6px 14px rgba(0,0,0,.22) !important;
+}
+
+/* Bottom navigation remains the bright tactile anchor. */
+@media(max-width:650px){
+  body.dark-mode .sidebar{
+    background:linear-gradient(145deg,#244f42,#132d25) !important;
+    border-color:#3a5a4d !important;
+    box-shadow:0 14px 30px rgba(0,0,0,.42),inset 1px 1px 0 rgba(255,255,255,.09) !important;
+  }
+  body.dark-mode .nav-item{color:#a8bdb5 !important}
+  body.dark-mode .nav-item.active{color:#f4fff9 !important;background:linear-gradient(145deg,rgba(255,255,255,.14),rgba(255,255,255,.045)) !important}
+  body.dark-mode .nav-item.active span{color:#9fe5c9 !important}
+  body.dark-mode .sidebar nav:first-of-type .nav-item:first-child,
+  body.dark-mode .sidebar nav:first-of-type .nav-item:first-child.active{
+    background:linear-gradient(145deg,#d9f7ea,#79c5a5) !important;
+    color:#143a30 !important;
+    border-color:rgba(255,255,255,.7) !important;
+    box-shadow:0 11px 23px rgba(0,0,0,.4),inset 3px 3px 6px rgba(255,255,255,.75),inset -4px -5px 9px rgba(36,93,73,.28) !important;
+  }
+  body.dark-mode .sidebar nav:first-of-type .nav-item:first-child span{color:#143a30 !important}
+}
+
+/* Profile menu + settings sheet. */
+body.dark-mode .profile-menu,
+body.dark-mode .settings-sheet,
+body.dark-mode .confirm-sheet{
+  background:linear-gradient(145deg,#20372f,#15251f) !important;
+  color:var(--dark-text) !important;
+  border-color:#3c594e !important;
+  box-shadow:0 25px 70px rgba(0,0,0,.52),inset 1px 1px 0 rgba(255,255,255,.05) !important;
+}
+body.dark-mode .profile-divider,
+body.dark-mode .settings-head,
+body.dark-mode .settings-section{border-color:#31483f !important}
+body.dark-mode .profile-action{color:#e1eee9 !important}
+body.dark-mode .profile-action:hover{background:#294238 !important}
+body.dark-mode .profile-action.danger{color:#ffb4ad !important}
+body.dark-mode .profile-action.danger:hover{background:#4a2928 !important}
+body.dark-mode .profile-avatar{background:linear-gradient(145deg,#c6eedc,#6fb998) !important;color:#153b30 !important}
+body.dark-mode .segmented{background:#0e1b17 !important;box-shadow:inset 2px 2px 5px rgba(0,0,0,.32),inset -1px -1px 2px rgba(255,255,255,.03) !important}
+body.dark-mode .segmented button{color:#9eb4ab !important}
+body.dark-mode .segmented button.active{background:#2b493d !important;color:#f2faf6 !important;box-shadow:0 2px 8px rgba(0,0,0,.25),inset 1px 1px 0 rgba(255,255,255,.06) !important}
+body.dark-mode .settings-note{background:#20372f !important;color:#a8bbb3 !important;border:1px solid #365248 !important}
+body.dark-mode .confirm-sheet p{color:#a8bbb3 !important}
+body.dark-mode .confirm-icon{background:linear-gradient(145deg,#512d2b,#39201f) !important;color:#ffb7b0 !important;box-shadow:inset 2px 2px 4px rgba(255,255,255,.06),inset -2px -2px 4px rgba(0,0,0,.2) !important}
+body.dark-mode .danger-btn{background:linear-gradient(145deg,#663a37,#492623) !important;color:#ffd0cb !important;border-color:#87504a !important;box-shadow:2px 3px 7px rgba(0,0,0,.28),inset 1px 1px 0 rgba(255,255,255,.05) !important}
+body.dark-mode .settings-overlay,
+body.dark-mode .confirm-overlay{background:rgba(1,8,6,.72) !important}
+
+/* Login screen also gets the same theme when dark mode is remembered. */
+body.dark-mode .login-view{background:#0d1714 !important}
+body.dark-mode .login-panel{background:#14231e !important;color:var(--dark-text) !important}
+body.dark-mode .login-copy,
+body.dark-mode .small-note{color:var(--dark-muted) !important}
+body.dark-mode .small-note code{background:#20372f !important;color:#d9eee6 !important}
+body.dark-mode .login-form label{color:#eaf5f1 !important}
+body.dark-mode .brand-mark{background:#2b5c4b !important;color:#f2faf6 !important}

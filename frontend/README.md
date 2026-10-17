@@ -23,7 +23,7 @@ Do not put a Supabase service-role key in `config.js` or any frontend file.
 
 ## 3. What the dashboard does
 - Caregiver sign-in
-- Overview of device, battery, latest location, and obstacle events
+- Overview of device, latest location, and obstacle events
 - Live obstacle monitoring using three sensor directions: left, center, right
 - Voice guidance status
 - GPS map and location history
@@ -32,6 +32,8 @@ Do not put a Supabase service-role key in `config.js` or any frontend file.
 - Caregiver/family access page
 - Supabase realtime updates for newly inserted locations and obstacle events
 - Demo mode when Supabase is not configured
+- Installable PWA with the Smart Eyeglasses logo
+- Demo telemetry mapped to Legazpi City, Albay
 
 ## 4. Expected telemetry flow
 ESP32 -> authenticated API/Edge Function -> Supabase -> Web Dashboard

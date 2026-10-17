@@ -1,99 +1,157 @@
 -- SMART EYEGLASSES SUPABASE SCHEMA
--- Run this in Supabase SQL Editor.
--- Uses the entities already reflected in the thesis: Profiles, Devices,
--- Device_Access, Locations, and Obstacle_Events.
+-- Final minimal schema aligned with the Smart Eyeglasses class diagram.
+-- No battery, GPS-status, Wi-Fi-status, Bluetooth-status, last_seen, or access_role fields.
 
-create extension if not exists pgcrypto;
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
-create table if not exists public.profiles (
-  id uuid primary key references auth.users(id) on delete cascade,
-  full_name text,
-  role text not null default 'caregiver' check (role in ('caregiver','family_member','user','admin')),
-  created_at timestamptz not null default now()
+CREATE TABLE public.profiles (
+  id uuid NOT NULL,
+  name text NOT NULL,
+  email text NOT NULL,
+  role text NOT NULL DEFAULT 'family_member'
+    CHECK (role IN ('visually_impaired_user','family_member','caregiver','admin')),
+  created_at timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT profiles_pkey PRIMARY KEY (id),
+  CONSTRAINT profiles_id_fkey FOREIGN KEY (id)
+    REFERENCES auth.users(id) ON DELETE CASCADE
 );
 
-create table if not exists public.devices (
-  id uuid primary key default gen_random_uuid(),
-  device_code text unique not null,
-  device_name text not null default 'Smart Eyeglasses',
-  owner_id uuid references public.profiles(id) on delete set null,
-  status text not null default 'offline' check (status in ('online','offline','maintenance')),
-  battery_percent integer check (battery_percent between 0 and 100),
-  last_seen timestamptz,
-  created_at timestamptz not null default now()
+CREATE TABLE public.devices (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  owner_user_id uuid NOT NULL,
+  device_name text NOT NULL,
+  status text NOT NULL DEFAULT 'offline'
+    CHECK (status IN ('online','offline')),
+  created_at timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT devices_pkey PRIMARY KEY (id),
+  CONSTRAINT devices_owner_user_id_fkey FOREIGN KEY (owner_user_id)
+    REFERENCES public.profiles(id) ON DELETE CASCADE
 );
 
-create table if not exists public.device_access (
-  id uuid primary key default gen_random_uuid(),
-  device_id uuid not null references public.devices(id) on delete cascade,
-  profile_id uuid not null references public.profiles(id) on delete cascade,
-  access_role text not null default 'viewer' check (access_role in ('viewer','caregiver','admin')),
-  created_at timestamptz not null default now(),
-  unique(device_id, profile_id)
+CREATE TABLE public.device_access (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  device_id uuid NOT NULL,
+  user_id uuid NOT NULL,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT device_access_pkey PRIMARY KEY (id),
+  CONSTRAINT device_access_device_id_fkey FOREIGN KEY (device_id)
+    REFERENCES public.devices(id) ON DELETE CASCADE,
+  CONSTRAINT device_access_user_id_fkey FOREIGN KEY (user_id)
+    REFERENCES public.profiles(id) ON DELETE CASCADE,
+  CONSTRAINT device_access_unique UNIQUE (device_id, user_id)
 );
 
-create table if not exists public.locations (
-  id uuid primary key default gen_random_uuid(),
-  device_id uuid not null references public.devices(id) on delete cascade,
-  latitude double precision not null,
-  longitude double precision not null,
-  accuracy double precision,
-  created_at timestamptz not null default now()
+CREATE TABLE public.locations (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  device_id uuid NOT NULL,
+  latitude double precision NOT NULL,
+  longitude double precision NOT NULL,
+  timestamp timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT locations_pkey PRIMARY KEY (id),
+  CONSTRAINT locations_device_id_fkey FOREIGN KEY (device_id)
+    REFERENCES public.devices(id) ON DELETE CASCADE
 );
 
-create table if not exists public.obstacle_events (
-  id uuid primary key default gen_random_uuid(),
-  device_id uuid not null references public.devices(id) on delete cascade,
-  location_id uuid references public.locations(id) on delete set null,
-  direction text not null check (direction in ('Left','Center','Right')),
-  distance double precision not null,
-  severity text not null check (severity in ('Low','Medium','High')),
-  voice_command text,
-  created_at timestamptz not null default now()
+CREATE TABLE public.obstacle_events (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  device_id uuid NOT NULL,
+  direction text NOT NULL
+    CHECK (direction IN ('left','center','right','multiple')),
+  distance_cm numeric NOT NULL,
+  severity text NOT NULL
+    CHECK (severity IN ('warning','danger')),
+  voice_command text NOT NULL,
+  timestamp timestamptz NOT NULL DEFAULT now(),
+  location_id uuid,
+  CONSTRAINT obstacle_events_pkey PRIMARY KEY (id),
+  CONSTRAINT obstacle_events_device_id_fkey FOREIGN KEY (device_id)
+    REFERENCES public.devices(id) ON DELETE CASCADE,
+  CONSTRAINT obstacle_events_location_id_fkey FOREIGN KEY (location_id)
+    REFERENCES public.locations(id) ON DELETE SET NULL
 );
 
-create index if not exists idx_locations_device_time on public.locations(device_id, created_at desc);
-create index if not exists idx_events_device_time on public.obstacle_events(device_id, created_at desc);
-create index if not exists idx_access_profile on public.device_access(profile_id);
+CREATE INDEX idx_device_access_user
+  ON public.device_access(user_id);
+CREATE INDEX idx_device_access_device
+  ON public.device_access(device_id);
+CREATE INDEX idx_locations_device_timestamp
+  ON public.locations(device_id, timestamp DESC);
+CREATE INDEX idx_obstacle_events_device_timestamp
+  ON public.obstacle_events(device_id, timestamp DESC);
 
-alter table public.profiles enable row level security;
-alter table public.devices enable row level security;
-alter table public.device_access enable row level security;
-alter table public.locations enable row level security;
-alter table public.obstacle_events enable row level security;
+-- Row Level Security
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.devices ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.device_access ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.locations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.obstacle_events ENABLE ROW LEVEL SECURITY;
 
--- Profiles: a signed-in user can read/update their own profile.
-create policy "profiles_select_own" on public.profiles for select to authenticated using (id = auth.uid());
-create policy "profiles_update_own" on public.profiles for update to authenticated using (id = auth.uid());
+CREATE POLICY "profiles_select_own"
+  ON public.profiles FOR SELECT TO authenticated
+  USING (id = auth.uid());
 
--- Device access: users can see access rows assigned to them.
-create policy "access_select_own" on public.device_access for select to authenticated using (profile_id = auth.uid());
+CREATE POLICY "profiles_update_own"
+  ON public.profiles FOR UPDATE TO authenticated
+  USING (id = auth.uid())
+  WITH CHECK (id = auth.uid());
 
--- Devices/telemetry: allow signed-in users to read devices they own or can access.
-create policy "devices_select_authorized" on public.devices for select to authenticated using (
-  owner_id = auth.uid() or exists (
-    select 1 from public.device_access da
-    where da.device_id = devices.id and da.profile_id = auth.uid()
-  )
-);
+CREATE POLICY "device_access_select_own"
+  ON public.device_access FOR SELECT TO authenticated
+  USING (user_id = auth.uid());
 
-create policy "locations_select_authorized" on public.locations for select to authenticated using (
-  exists (select 1 from public.devices d where d.id = locations.device_id and (
-    d.owner_id = auth.uid() or exists (select 1 from public.device_access da where da.device_id = d.id and da.profile_id = auth.uid())
-  ))
-);
+CREATE POLICY "devices_select_authorized"
+  ON public.devices FOR SELECT TO authenticated
+  USING (
+    owner_user_id = auth.uid()
+    OR EXISTS (
+      SELECT 1
+      FROM public.device_access da
+      WHERE da.device_id = devices.id
+        AND da.user_id = auth.uid()
+    )
+  );
 
-create policy "events_select_authorized" on public.obstacle_events for select to authenticated using (
-  exists (select 1 from public.devices d where d.id = obstacle_events.device_id and (
-    d.owner_id = auth.uid() or exists (select 1 from public.device_access da where da.device_id = d.id and da.profile_id = auth.uid())
-  ))
-);
+CREATE POLICY "locations_select_authorized"
+  ON public.locations FOR SELECT TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1
+      FROM public.devices d
+      WHERE d.id = locations.device_id
+        AND (
+          d.owner_user_id = auth.uid()
+          OR EXISTS (
+            SELECT 1
+            FROM public.device_access da
+            WHERE da.device_id = d.id
+              AND da.user_id = auth.uid()
+          )
+        )
+    )
+  );
 
--- IMPORTANT:
--- The ESP32 should NOT be given a service-role key. For production, send
--- telemetry through a protected Edge Function or another authenticated API.
--- Do not expose the service-role key in HTML/JavaScript.
+CREATE POLICY "obstacle_events_select_authorized"
+  ON public.obstacle_events FOR SELECT TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1
+      FROM public.devices d
+      WHERE d.id = obstacle_events.device_id
+        AND (
+          d.owner_user_id = auth.uid()
+          OR EXISTS (
+            SELECT 1
+            FROM public.device_access da
+            WHERE da.device_id = d.id
+              AND da.user_id = auth.uid()
+          )
+        )
+    )
+  );
 
--- Enable realtime for the dashboard tables if not already enabled.
-alter publication supabase_realtime add table public.locations;
-alter publication supabase_realtime add table public.obstacle_events;
+-- For production telemetry, send ESP32 data through a protected API/Edge Function.
+-- Never expose a Supabase service-role key in the browser or on the device.
+
+-- Realtime tables used by the dashboard.
+ALTER PUBLICATION supabase_realtime ADD TABLE public.locations;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.obstacle_events;
