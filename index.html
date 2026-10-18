@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Smart Eyeglasses | Caregiver Dashboard</title>
+  <title>Smart Eyeglasses Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
@@ -24,7 +24,7 @@
       <div class="confirm-icon"><iconify-icon icon="solar:logout-2-linear"></iconify-icon></div>
       <span class="panel-kicker">ACCOUNT</span>
       <h3 id="logoutTitle">Sign out?</h3>
-      <p id="logoutMessage">Are you sure you want to sign out of the caregiver dashboard?</p>
+      <p id="logoutMessage">Are you sure you want to sign out?</p>
       <div class="confirm-actions">
         <button id="cancelLogout" class="secondary-btn">Cancel</button>
         <button id="confirmLogout" class="danger-btn">Sign out</button>
@@ -39,7 +39,7 @@
       <h3 id="resetTitle">Reset your password</h3>
       <p id="resetMessage">Enter your account email and we'll send you a password reset link.</p>
       <label class="reset-label" for="resetEmailInput">Email</label>
-      <input id="resetEmailInput" class="reset-input" type="email" autocomplete="email" placeholder="caregiver@example.com" />
+      <input id="resetEmailInput" class="reset-input" type="email" autocomplete="email" placeholder="Enter your email" />
       <div class="confirm-actions">
         <button id="cancelReset" class="secondary-btn" type="button">Cancel</button>
         <button id="sendReset" class="primary-btn" type="button">Send reset link</button>
@@ -52,7 +52,7 @@
       <div class="confirm-icon reset-icon"><iconify-icon icon="solar:lock-password-linear"></iconify-icon></div>
       <span class="panel-kicker">ACCOUNT RECOVERY</span>
       <h3 id="updatePasswordTitle">Choose a new password</h3>
-      <p id="updatePasswordMessage">Set a new password for your caregiver account.</p>
+      <p id="updatePasswordMessage">Set a new password for your account.</p>
       <label class="reset-label" for="newPasswordInput">New password</label>
       <div class="password-field reset-password-field">
         <input id="newPasswordInput" class="reset-input" type="password" autocomplete="new-password" placeholder="••••••••" />
@@ -75,10 +75,10 @@
     <div class="login-panel">
       <div class="brand-mark logo-mark"><img src="smart-glasses-logo.svg" alt="Smart Eyeglasses" /></div>
       <div class="eyebrow">CAREGIVER MONITORING</div>
-      <h1>Smart Eyeglasses<br><span>Care Dashboard</span></h1>
+      <h1>Smart Eyeglasses<br><span>Dashboard</span></h1>
       <p class="login-copy">A simple way to check your relative's location, connection, and recent obstacle alerts.</p>
       <form id="loginForm" class="login-form">
-        <label>Email<input id="emailInput" type="email" placeholder="caregiver@example.com" required /></label>
+        <label>Email<input id="emailInput" type="email" placeholder="Enter your email" required /></label>
         <label>Password
           <span class="password-field">
             <input id="passwordInput" type="password" placeholder="••••••••" autocomplete="current-password" required />
@@ -90,7 +90,7 @@
         <button id="forgotPasswordBtn" class="forgot-password" type="button">Forgot password?</button>
         <button class="primary-btn" type="submit">Sign in <span><iconify-icon icon="solar:arrow-right-linear"></iconify-icon></span></button>
       </form>
-      <p id="authHint" class="small-note">Sign in with your caregiver account to view live Smart Eyeglasses data.</p>
+      <p id="authHint" class="small-note">Sign in with your account to view live Smart Eyeglasses data.</p>
     </div>
     <div class="login-visual">
       <div class="visual-grid"></div>
@@ -115,7 +115,7 @@
         <button class="nav-item" data-section="access"><span><iconify-icon icon="solar:users-group-rounded-linear"></iconify-icon></span> Family Access</button>
       </nav>
       <div class="sidebar-bottom">
-        <div class="connection-card"><span class="status-dot"></span><div><b id="connectionLabel">Live data</b><small id="connectionSub">Supabase connected</small></div></div>
+        <div class="connection-card"><span class="status-dot"></span><div><b id="connectionLabel">Live data</b><small id="connectionSub">Connected</small></div></div>
         <button id="logoutBtn" class="logout-btn"><iconify-icon icon="solar:logout-2-linear"></iconify-icon> Sign out</button>
       </div>
     </aside>
@@ -155,11 +155,11 @@
         <div class="alert-summary"><div><span>Alerts today</span><strong id="alertsTotal">4</strong></div><div><span>Latest alert</span><strong id="latestAlertText">2 min ago</strong></div></div>
         <div class="filter-row"><input id="eventSearch" class="search-input" placeholder="Search alerts…" /><select id="severityFilter"><option value="all">All alerts</option><option value="High">More urgent</option><option value="Medium">Moderate</option><option value="Low">Less urgent</option></select><button id="clearFilterBtn" class="secondary-btn">Reset</button></div>
         <div class="panel table-panel"><div id="eventsTable" class="table-wrap"></div></div>
-        <p class="plain-note"><iconify-icon icon="solar:info-circle-linear"></iconify-icon> Alerts show what the glasses detected. They do not identify people or objects.</p>
+        <p class="plain-note"><iconify-icon icon="solar:info-circle-linear"></iconify-icon> Alerts show what the glasses detected.</p>
       </section>
 
       <section id="devices" class="page-section">
-        <div class="section-heading"><div><span class="panel-kicker">SMART GLASSES</span><h3>How are the glasses doing?</h3><p>A simple status view of the device. Technical details are available below for reference.</p></div></div>
+        <div class="section-heading"><div><span class="panel-kicker">SMART GLASSES</span><h3>How are the glasses doing?</h3><p>A status view of the device. Technical details are available below for reference.</p></div></div>
         <div id="deviceCards" class="device-grid"></div>
         <div class="panel technical-panel"><div class="panel-head"><div><span class="panel-kicker">DEVICE DETAILS</span><h4>Technical information</h4></div><button id="technicalToggle" class="text-btn">Hide details</button></div><div id="technicalDetails" class="technical-details"><div><span>Controller</span><b>ESP32 DevKit V1</b></div><div><span>Obstacle sensors</span><b>VL53L0X obstacle sensors</b></div><div><span>Location</span><b>NEO-6M GPS</b></div><div><span>Audio</span><b>VV4 bone-conduction headset</b></div><div><span>Connection</span><b id="technicalConnection">Connected</b></div></div></div>
       </section>
@@ -174,7 +174,7 @@
   <div id="profileMenu" class="profile-menu hidden" role="dialog" aria-label="Profile menu">
     <div class="profile-card-head">
       <div class="profile-avatar"><iconify-icon icon="solar:user-linear"></iconify-icon></div>
-      <div><b id="profileName">Caregiver</b><small id="profileEmail">caregiver@example.com</small></div>
+      <div><b id="profileName">Caregiver</b><small id="profileEmail">Enter your email</small></div>
     </div>
     <div class="profile-divider"></div>
     <button class="profile-action hidden" id="installBtn"><iconify-icon icon="solar:download-minimalistic-linear"></iconify-icon><span>Install app</span><iconify-icon class="chev" icon="solar:alt-arrow-right-linear"></iconify-icon></button>
