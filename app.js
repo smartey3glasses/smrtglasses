@@ -730,7 +730,9 @@ function textNode(element, text) {
 function applyTheme() {
   document.body.classList.toggle('dark-mode', currentTheme === 'dark');
   document.querySelectorAll('#themeControl button').forEach(button => {
-    button.classList.toggle('active', button.dataset.theme === currentTheme);
+    const active = button.dataset.theme === currentTheme;
+    button.classList.toggle('active', active);
+    button.setAttribute('aria-pressed', String(active));
   });
 }
 
@@ -755,7 +757,6 @@ function applyLanguage() {
     $('pageTitle').textContent = titles[active.dataset.section] || text.pageHome;
   }
 
-  textNode($('settingsBtn'), text.settings);
   textNode($('installBtn'), text.install);
   textNode($('profileLogoutBtn'), text.signout);
   textNode($('logoutTitle'), text.signoutTitle);
@@ -782,20 +783,6 @@ function applyLanguage() {
     passwordToggle.setAttribute('title', label);
   }
 
-  const labels = document.querySelectorAll('.settings-label');
-  if (labels[0]) labels[0].textContent = text.appearance;
-  if (labels[1]) labels[1].textContent = `${text.language} / Wika`;
-
-  const rows = document.querySelectorAll('.setting-row');
-  if (rows[0]) {
-    rows[0].querySelector('b').textContent = text.theme;
-    rows[0].querySelector('small').textContent = text.themeHint;
-  }
-  if (rows[1]) {
-    rows[1].querySelector('b').textContent = text.language;
-    rows[1].querySelector('small').textContent = text.languageHint;
-  }
-
   const themeButtons = document.querySelectorAll('#themeControl button');
   if (themeButtons[0]) {
     themeButtons[0].setAttribute('aria-label', text.light);
@@ -806,18 +793,6 @@ function applyLanguage() {
     themeButtons[1].setAttribute('title', text.dark);
   }
 
-  const languageButtons = document.querySelectorAll('#languageControl button');
-  if (languageButtons[0]) languageButtons[0].textContent = text.english;
-  if (languageButtons[1]) languageButtons[1].textContent = text.filipino;
-
-  const kicker = document.querySelector('.settings-head .panel-kicker');
-  if (kicker) kicker.textContent = text.preferences;
-
-  const note = document.querySelector('.settings-note span');
-  if (note) note.textContent = text.note;
-
-  document.documentElement.lang = currentLang === 'fil' ? 'fil' : 'en';
-  languageButtons.forEach(button => button.classList.toggle('active', button.dataset.lang === currentLang));
 }
 
 function openProfile() {
@@ -828,16 +803,6 @@ function closeProfile() {
   $('profileMenu').classList.add('hidden');
 }
 
-function openSettings() {
-  closeProfile();
-  $('settingsPanel').classList.remove('hidden');
-  applyTheme();
-  applyLanguage();
-}
-
-function closeSettings() {
-  $('settingsPanel').classList.add('hidden');
-}
 
 function openLogout() {
   closeProfile();
@@ -862,12 +827,6 @@ function setTheme(theme) {
   toast(theme === 'dark' ? 'Dark mode enabled.' : 'Light mode enabled.');
 }
 
-function setLanguage(language) {
-  currentLang = language;
-  localStorage.setItem('ses-lang', language);
-  applyLanguage();
-  toast(language === 'fil' ? 'Filipino labels enabled.' : 'English labels enabled.');
-}
 
 function bind() {
   $('loginForm').addEventListener('submit', login);
@@ -963,20 +922,10 @@ function bind() {
     event.stopPropagation();
     installApp();
   });
-  $('settingsBtn').addEventListener('click', event => {
-    event.preventDefault();
-    event.stopPropagation();
-    openSettings();
-  });
   $('profileLogoutBtn').addEventListener('click', event => {
     event.preventDefault();
     event.stopPropagation();
     openLogout();
-  });
-  $('closeSettings').addEventListener('click', event => {
-    event.preventDefault();
-    event.stopPropagation();
-    closeSettings();
   });
   $('cancelLogout').addEventListener('click', event => {
     event.preventDefault();
@@ -994,13 +943,9 @@ function bind() {
   document.querySelectorAll('#themeControl button').forEach(button => {
     button.addEventListener('click', () => setTheme(button.dataset.theme));
   });
-  document.querySelectorAll('#languageControl button').forEach(button => {
-    button.addEventListener('click', () => setLanguage(button.dataset.lang));
-  });
   document.addEventListener('keydown', event => {
     if (event.key === 'Escape') {
       closeProfile();
-      closeSettings();
       closeLogout();
       closeReset();
       closeUpdatePassword();
@@ -1008,9 +953,6 @@ function bind() {
   });
   document.addEventListener('click', event => {
     if (!$('profileMenu').contains(event.target) && event.target !== $('profileBtn')) closeProfile();
-  });
-  $('settingsPanel').addEventListener('click', event => {
-    if (event.target === $('settingsPanel')) closeSettings();
   });
   applyTheme();
   applyLanguage();

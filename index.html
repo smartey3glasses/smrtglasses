@@ -188,23 +188,15 @@
     </div>
     <div class="profile-divider"></div>
     <button class="profile-action hidden" id="installBtn"><iconify-icon icon="solar:download-minimalistic-linear"></iconify-icon><span>Install app</span><iconify-icon class="chev" icon="solar:alt-arrow-right-linear"></iconify-icon></button>
-    <button class="profile-action" id="settingsBtn"><iconify-icon icon="solar:settings-linear"></iconify-icon><span>Settings</span><iconify-icon class="chev" icon="solar:alt-arrow-right-linear"></iconify-icon></button>
-    <button class="profile-action danger" id="profileLogoutBtn"><iconify-icon icon="solar:logout-2-linear"></iconify-icon><span>Sign out</span></button>
-  </div>
-
-  <div id="settingsPanel" class="settings-overlay hidden">
-    <div class="settings-sheet" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
-      <div class="settings-head"><div><span class="panel-kicker">PREFERENCES</span><h3 id="settingsTitle">Settings</h3></div><button id="closeSettings" class="icon-btn" aria-label="Close settings"><iconify-icon icon="solar:close-circle-linear"></iconify-icon></button></div>
-      <div class="settings-section">
-        <span class="settings-label">Appearance</span>
-        <div class="setting-row"><div><b>Theme</b><small>Choose how the dashboard looks.</small></div><div class="segmented theme-control" id="themeControl"><button data-theme="light" aria-label="Light theme" title="Light theme" aria-pressed="true"><iconify-icon icon="solar:sun-2-linear"></iconify-icon></button><button data-theme="dark" aria-label="Dark theme" title="Dark theme" aria-pressed="false"><iconify-icon icon="solar:moon-linear"></iconify-icon></button></div></div>
+    <div class="profile-theme-row">
+      <div class="profile-theme-label"><iconify-icon icon="solar:sun-2-linear"></iconify-icon><span>Appearance</span></div>
+      <div class="segmented theme-control" id="themeControl" aria-label="Theme">
+        <button type="button" data-theme="light" aria-label="Light mode" title="Light mode" aria-pressed="true"><iconify-icon icon="solar:sun-2-linear"></iconify-icon></button>
+        <button type="button" data-theme="dark" aria-label="Dark mode" title="Dark mode" aria-pressed="false"><iconify-icon icon="solar:moon-linear"></iconify-icon></button>
       </div>
-      <div class="settings-section">
-        <span class="settings-label">Language / Wika</span>
-        <div class="setting-row"><div><b>Language</b><small>English or Filipino.</small></div><div class="segmented language-control" id="languageControl"><button data-lang="en" aria-pressed="true">English</button><button data-lang="fil" aria-pressed="false">Filipino</button></div></div>
-      </div>
-      <div class="settings-note"><iconify-icon icon="solar:info-circle-linear"></iconify-icon><span>Language changes the caregiver-facing labels and controls. Device technical terms stay in their original names.</span></div>
     </div>
+    <div class="profile-divider profile-divider-bottom"></div>
+    <button class="profile-action danger" id="profileLogoutBtn"><iconify-icon icon="solar:logout-2-linear"></iconify-icon><span>Sign out</span></button>
   </div>
 
   <script src="config.js"></script>
