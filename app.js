@@ -797,13 +797,14 @@ function applyLanguage() {
   }
 
   const themeButtons = document.querySelectorAll('#themeControl button');
-  themeButtons.forEach(button => {
-    const isLight = button.dataset.theme === 'light';
-    const label = isLight ? text.light : text.dark;
-    button.setAttribute('aria-label', label);
-    button.setAttribute('title', label);
-    button.setAttribute('aria-pressed', button.dataset.theme === currentTheme ? 'true' : 'false');
-  });
+  if (themeButtons[0]) {
+    themeButtons[0].setAttribute('aria-label', text.light);
+    themeButtons[0].setAttribute('title', text.light);
+  }
+  if (themeButtons[1]) {
+    themeButtons[1].setAttribute('aria-label', text.dark);
+    themeButtons[1].setAttribute('title', text.dark);
+  }
 
   const languageButtons = document.querySelectorAll('#languageControl button');
   if (languageButtons[0]) languageButtons[0].textContent = text.english;
@@ -816,10 +817,7 @@ function applyLanguage() {
   if (note) note.textContent = text.note;
 
   document.documentElement.lang = currentLang === 'fil' ? 'fil' : 'en';
-  languageButtons.forEach(button => {
-    button.classList.toggle('active', button.dataset.lang === currentLang);
-    button.setAttribute('aria-pressed', button.dataset.lang === currentLang ? 'true' : 'false');
-  });
+  languageButtons.forEach(button => button.classList.toggle('active', button.dataset.lang === currentLang));
 }
 
 function openProfile() {
