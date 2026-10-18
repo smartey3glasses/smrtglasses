@@ -42,7 +42,25 @@ const i18n = {
     english: 'English',
     filipino: 'Filipino',
     preferences: 'PREFERENCES',
-    note: 'Language changes the caregiver-facing labels and controls. Device technical terms stay in their original names.'
+    note: 'Language changes the caregiver-facing labels and controls. Device technical terms stay in their original names.',
+    forgotPassword: 'Forgot password?',
+    resetTitle: 'Reset your password',
+    resetMessage: "Enter your account email and we'll send you a password reset link.",
+    resetEmail: 'Email',
+    resetCancel: 'Cancel',
+    resetSend: 'Send reset link',
+    resetSent: 'Password reset link sent. Check your email.',
+    resetRequired: 'Enter your account email first.',
+    passwordShown: 'Hide password',
+    passwordHidden: 'Show password',
+    updatePasswordTitle: 'Choose a new password',
+    updatePasswordMessage: 'Set a new password for your caregiver account.',
+    newPassword: 'New password',
+    confirmPassword: 'Confirm password',
+    updatePassword: 'Update password',
+    passwordUpdated: 'Password updated successfully.',
+    passwordMismatch: 'The passwords do not match.',
+    passwordShort: 'Use at least 8 characters.'
   },
   fil: {
     navHome: 'Home',
@@ -71,7 +89,25 @@ const i18n = {
     english: 'English',
     filipino: 'Filipino',
     preferences: 'MGA SETTING',
-    note: 'Binabago ng wika ang mga label at controls para sa caregiver. Hindi isinasalin ang technical terms ng device.'
+    note: 'Binabago ng wika ang mga label at controls para sa caregiver. Hindi isinasalin ang technical terms ng device.',
+    forgotPassword: 'Nakalimutan ang password?',
+    resetTitle: 'I-reset ang password',
+    resetMessage: 'Ilagay ang email ng account at padadalhan ka namin ng reset link.',
+    resetEmail: 'Email',
+    resetCancel: 'Kanselahin',
+    resetSend: 'Magpadala ng reset link',
+    resetSent: 'Naipadala ang password reset link. Tingnan ang email mo.',
+    resetRequired: 'Ilagay muna ang email ng account.',
+    passwordShown: 'Itago ang password',
+    passwordHidden: 'Ipakita ang password',
+    updatePasswordTitle: 'Gumawa ng bagong password',
+    updatePasswordMessage: 'Magtakda ng bagong password para sa caregiver account mo.',
+    newPassword: 'Bagong password',
+    confirmPassword: 'Kumpirmahin ang password',
+    updatePassword: 'I-update ang password',
+    passwordUpdated: 'Matagumpay na na-update ang password.',
+    passwordMismatch: 'Hindi magkapareho ang mga password.',
+    passwordShort: 'Gumamit ng hindi bababa sa 8 characters.'
   }
 };
 
@@ -467,6 +503,85 @@ function subscribeToDevice(deviceId) {
     .subscribe();
 }
 
+function openReset() {
+  $('resetEmailInput').value = $('emailInput').value.trim();
+  $('resetModal').classList.remove('hidden');
+  setTimeout(() => $('resetEmailInput').focus(), 50);
+}
+
+function closeReset() {
+  $('resetModal').classList.add('hidden');
+}
+
+function togglePassword() {
+  const input = $('passwordInput');
+  const button = $('togglePassword');
+  const visible = input.type === 'text';
+  input.type = visible ? 'password' : 'text';
+  button.setAttribute('aria-label', visible ? i18n[currentLang].passwordHidden : i18n[currentLang].passwordShown);
+  button.setAttribute('title', visible ? i18n[currentLang].passwordHidden : i18n[currentLang].passwordShown);
+  button.innerHTML = `<iconify-icon icon="${visible ? 'solar:eye-linear' : 'solar:eye-closed-linear'}"></iconify-icon>`;
+}
+
+function closeUpdatePassword() {
+  $('updatePasswordModal').classList.add('hidden');
+}
+
+function togglePasswordField(inputId, buttonId) {
+  const input = $(inputId);
+  const button = $(buttonId);
+  const visible = input.type === 'text';
+  input.type = visible ? 'password' : 'text';
+  const label = visible ? i18n[currentLang].passwordHidden : i18n[currentLang].passwordShown;
+  button.setAttribute('aria-label', label);
+  button.setAttribute('title', label);
+  button.innerHTML = `<iconify-icon icon="${visible ? 'solar:eye-linear' : 'solar:eye-closed-linear'}"></iconify-icon>`;
+}
+
+async function updatePassword() {
+  const password = $('newPasswordInput').value;
+  const confirmation = $('confirmPasswordInput').value;
+  if (password.length < 8) {
+    toast(i18n[currentLang].passwordShort);
+    return;
+  }
+  if (password !== confirmation) {
+    toast(i18n[currentLang].passwordMismatch);
+    return;
+  }
+  const { error } = await supabaseClient.auth.updateUser({ password });
+  if (error) {
+    toast(error.message);
+    return;
+  }
+  $('newPasswordInput').value = '';
+  $('confirmPasswordInput').value = '';
+  closeUpdatePassword();
+  toast(i18n[currentLang].passwordUpdated);
+}
+
+async function sendPasswordReset() {
+  if (!supabaseClient) {
+    toast('Supabase is not configured.');
+    return;
+  }
+  const email = $('resetEmailInput').value.trim();
+  if (!email) {
+    toast(i18n[currentLang].resetRequired);
+    $('resetEmailInput').focus();
+    return;
+  }
+  const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+    redirectTo: `${window.location.origin}${window.location.pathname}`
+  });
+  if (error) {
+    toast(error.message);
+    return;
+  }
+  closeReset();
+  toast(i18n[currentLang].resetSent);
+}
+
 async function login(event) {
   event.preventDefault();
 
@@ -591,6 +706,25 @@ function applyLanguage() {
   textNode($('logoutMessage'), text.signoutMessage);
   textNode($('cancelLogout'), text.cancel);
   textNode($('confirmLogout'), text.signout);
+  textNode($('forgotPasswordBtn'), text.forgotPassword);
+  textNode($('resetTitle'), text.resetTitle);
+  textNode($('resetMessage'), text.resetMessage);
+  textNode($('cancelReset'), text.resetCancel);
+  textNode($('sendReset'), text.resetSend);
+  textNode($('updatePasswordTitle'), text.updatePasswordTitle);
+  textNode($('updatePasswordMessage'), text.updatePasswordMessage);
+  textNode(document.querySelector('label[for="newPasswordInput"]'), text.newPassword);
+  textNode(document.querySelector('label[for="confirmPasswordInput"]'), text.confirmPassword);
+  textNode($('saveNewPassword'), text.updatePassword);
+  const resetLabel = $('resetEmailInput')?.previousElementSibling;
+  if (resetLabel) resetLabel.textContent = text.resetEmail;
+  const passwordToggle = $('togglePassword');
+  if (passwordToggle) {
+    const visible = $('passwordInput').type === 'text';
+    const label = visible ? text.passwordShown : text.passwordHidden;
+    passwordToggle.setAttribute('aria-label', label);
+    passwordToggle.setAttribute('title', label);
+  }
 
   const labels = document.querySelectorAll('.settings-label');
   if (labels[0]) labels[0].textContent = text.appearance;
@@ -675,6 +809,19 @@ function setLanguage(language) {
 
 function bind() {
   $('loginForm').addEventListener('submit', login);
+  $('togglePassword').addEventListener('click', togglePassword);
+  $('forgotPasswordBtn').addEventListener('click', openReset);
+  $('cancelReset').addEventListener('click', closeReset);
+  $('sendReset').addEventListener('click', sendPasswordReset);
+  $('toggleNewPassword').addEventListener('click', () => togglePasswordField('newPasswordInput', 'toggleNewPassword'));
+  $('toggleConfirmPassword').addEventListener('click', () => togglePasswordField('confirmPasswordInput', 'toggleConfirmPassword'));
+  $('saveNewPassword').addEventListener('click', updatePassword);
+  $('updatePasswordModal').addEventListener('click', event => {
+    if (event.target === $('updatePasswordModal')) closeUpdatePassword();
+  });
+  $('resetModal').addEventListener('click', event => {
+    if (event.target === $('resetModal')) closeReset();
+  });
   $('logoutBtn').addEventListener('click', logout);
   $('refreshBtn').addEventListener('click', async () => {
     await loadData();
@@ -764,6 +911,15 @@ function bind() {
   document.querySelectorAll('#languageControl button').forEach(button => {
     button.addEventListener('click', () => setLanguage(button.dataset.lang));
   });
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape') {
+      closeProfile();
+      closeSettings();
+      closeLogout();
+      closeReset();
+      closeUpdatePassword();
+    }
+  });
   document.addEventListener('click', event => {
     if (!$('profileMenu').contains(event.target) && event.target !== $('profileBtn')) closeProfile();
   });
@@ -806,6 +962,12 @@ bind();
   }
 
   supabaseClient = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+  supabaseClient.auth.onAuthStateChange((event) => {
+    if (event === 'PASSWORD_RECOVERY') {
+      $('updatePasswordModal').classList.remove('hidden');
+      setTimeout(() => $('newPasswordInput').focus(), 50);
+    }
+  });
   const { data, error } = await supabaseClient.auth.getSession();
 
   if (error) {

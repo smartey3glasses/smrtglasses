@@ -55,6 +55,14 @@ The SQL also configures:
 
 For an existing database, review the migration before execution and confirm that the legacy columns being removed are no longer required.
 
+## Authentication
+
+The caregiver dashboard uses Supabase Auth for sign-in. Public account creation is not exposed in the web app.
+
+Use Supabase Auth to create or provision caregiver and family accounts, then grant device access through the Family Access page.
+
+Password recovery is built into the sign-in screen. Configure the Supabase Auth Site URL and Redirect URLs to the deployed Vercel origin so the reset link can return to the dashboard and allow the caregiver to choose a new password.
+
 ## Register a device
 
 Create a row in `public.devices`:

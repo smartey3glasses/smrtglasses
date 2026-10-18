@@ -32,7 +32,44 @@
     </div>
   </div>
 
-<div id="toast" class="toast"></div>
+<div id="resetModal" class="confirm-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="resetTitle">
+    <div class="confirm-sheet reset-sheet">
+      <div class="confirm-icon reset-icon"><iconify-icon icon="solar:letter-linear"></iconify-icon></div>
+      <span class="panel-kicker">ACCOUNT RECOVERY</span>
+      <h3 id="resetTitle">Reset your password</h3>
+      <p id="resetMessage">Enter your account email and we'll send you a password reset link.</p>
+      <label class="reset-label" for="resetEmailInput">Email</label>
+      <input id="resetEmailInput" class="reset-input" type="email" autocomplete="email" placeholder="caregiver@example.com" />
+      <div class="confirm-actions">
+        <button id="cancelReset" class="secondary-btn" type="button">Cancel</button>
+        <button id="sendReset" class="primary-btn" type="button">Send reset link</button>
+      </div>
+    </div>
+  </div>
+
+<div id="updatePasswordModal" class="confirm-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="updatePasswordTitle">
+    <div class="confirm-sheet reset-sheet">
+      <div class="confirm-icon reset-icon"><iconify-icon icon="solar:lock-password-linear"></iconify-icon></div>
+      <span class="panel-kicker">ACCOUNT RECOVERY</span>
+      <h3 id="updatePasswordTitle">Choose a new password</h3>
+      <p id="updatePasswordMessage">Set a new password for your caregiver account.</p>
+      <label class="reset-label" for="newPasswordInput">New password</label>
+      <div class="password-field reset-password-field">
+        <input id="newPasswordInput" class="reset-input" type="password" autocomplete="new-password" placeholder="••••••••" />
+        <button id="toggleNewPassword" class="password-toggle" type="button" aria-label="Show password" title="Show password"><iconify-icon icon="solar:eye-linear"></iconify-icon></button>
+      </div>
+      <label class="reset-label" for="confirmPasswordInput">Confirm password</label>
+      <div class="password-field reset-password-field">
+        <input id="confirmPasswordInput" class="reset-input" type="password" autocomplete="new-password" placeholder="••••••••" />
+        <button id="toggleConfirmPassword" class="password-toggle" type="button" aria-label="Show password" title="Show password"><iconify-icon icon="solar:eye-linear"></iconify-icon></button>
+      </div>
+      <div class="confirm-actions">
+        <button id="saveNewPassword" class="primary-btn" type="button">Update password</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
 
   <section id="loginView" class="login-view">
     <div class="login-panel">
@@ -42,7 +79,15 @@
       <p class="login-copy">A simple way to check your relative's location, connection, and recent obstacle alerts.</p>
       <form id="loginForm" class="login-form">
         <label>Email<input id="emailInput" type="email" placeholder="caregiver@example.com" required /></label>
-        <label>Password<input id="passwordInput" type="password" placeholder="••••••••" required /></label>
+        <label>Password
+          <span class="password-field">
+            <input id="passwordInput" type="password" placeholder="••••••••" autocomplete="current-password" required />
+            <button id="togglePassword" class="password-toggle" type="button" aria-label="Show password" title="Show password">
+              <iconify-icon icon="solar:eye-linear"></iconify-icon>
+            </button>
+          </span>
+        </label>
+        <button id="forgotPasswordBtn" class="forgot-password" type="button">Forgot password?</button>
         <button class="primary-btn" type="submit">Sign in <span><iconify-icon icon="solar:arrow-right-linear"></iconify-icon></span></button>
       </form>
       <p id="authHint" class="small-note">Sign in with your caregiver account to view live Smart Eyeglasses data.</p>

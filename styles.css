@@ -661,3 +661,283 @@ body.dark-mode .small-note{color:var(--dark-muted) !important}
 body.dark-mode .small-note code{background:#20372f !important;color:#d9eee6 !important}
 body.dark-mode .login-form label{color:#eaf5f1 !important}
 body.dark-mode .brand-mark{background:#2b5c4b !important;color:#f2faf6 !important}
+
+
+:root{
+  --ink:#17352c;
+  --muted:#6d8179;
+  --line:#dbe8e2;
+  --surface:#fbfefd;
+  --soft:#f0f7f3;
+  --accent:#4fa982;
+  --accent-dark:#33795f;
+  --blue:#4a7fa1;
+  --green:#3f956d;
+  --red:#c95b54;
+  --shadow:0 18px 45px rgba(28,66,53,.08);
+  --radius:18px;
+}
+
+body{
+  background:#eef5f1;
+  color:var(--ink);
+}
+
+.login-view{
+  background:#edf5f1;
+}
+
+.login-panel{
+  background:linear-gradient(145deg,#fbfefd 0%,#f4faf7 100%);
+}
+
+.login-panel h1 span{
+  color:var(--accent-dark);
+}
+
+.brand-mark{
+  background:linear-gradient(145deg,#244d40,#17372e);
+  box-shadow:5px 7px 16px rgba(25,61,49,.2),inset 2px 2px 4px rgba(255,255,255,.14);
+}
+
+.login-form label{
+  color:#29463c;
+}
+
+.login-form input{
+  background:#fbfefd;
+  color:var(--ink);
+  box-shadow:inset 2px 2px 5px rgba(30,69,55,.035),0 1px 0 rgba(255,255,255,.9);
+}
+
+.password-field{
+  position:relative;
+  display:block;
+  margin-top:7px;
+}
+
+.password-field input{
+  margin-top:0;
+  padding-right:48px;
+}
+
+.password-toggle{
+  position:absolute;
+  top:50%;
+  right:6px;
+  transform:translateY(-50%);
+  width:36px;
+  height:36px;
+  border:0;
+  border-radius:9px;
+  display:grid;
+  place-items:center;
+  background:transparent;
+  color:#71877e;
+}
+
+.password-toggle:hover{
+  background:#e9f3ee;
+  color:#285c49;
+}
+
+.forgot-password{
+  justify-self:end;
+  margin-top:-5px;
+  border:0;
+  background:transparent;
+  color:#3f856a;
+  font-size:11px;
+  font-weight:700;
+  padding:2px 0;
+}
+
+.forgot-password:hover{
+  color:#235a46;
+  text-decoration:underline;
+}
+
+.primary-btn{
+  background:linear-gradient(145deg,#21483b,#17372e);
+  box-shadow:4px 6px 14px rgba(24,59,47,.14),inset 1px 1px 0 rgba(255,255,255,.12);
+}
+
+.primary-btn:hover{
+  background:linear-gradient(145deg,#285846,#1b4035);
+}
+
+.sidebar{
+  background:linear-gradient(180deg,#fbfefd,#f4faf7);
+}
+
+.nav-item{
+  color:#657970;
+}
+
+.nav-item:hover{
+  background:#eaf3ef;
+  color:#1c3c31;
+}
+
+.nav-item.active{
+  background:linear-gradient(145deg,#e6f2ed,#dcece5);
+  color:#193c30;
+  box-shadow:inset 1px 1px 0 rgba(255,255,255,.9),0 4px 10px rgba(31,76,59,.05);
+}
+
+.connection-card{
+  background:#e9f3ee;
+  border:1px solid #d4e5dd;
+}
+
+.panel,
+.care-card,
+.person-status,
+.device-card,
+.alert-summary div{
+  background:linear-gradient(145deg,#ffffff,#f8fcfa);
+  border-color:#dbe8e2;
+  box-shadow:5px 7px 20px rgba(30,72,57,.045),inset 1px 1px 0 rgba(255,255,255,.9);
+}
+
+.care-card:hover{
+  border-color:#bcd7ca;
+  box-shadow:7px 10px 24px rgba(30,72,57,.075),inset 1px 1px 0 rgba(255,255,255,.95);
+}
+
+.secondary-btn,
+.ghost-btn{
+  background:linear-gradient(145deg,#f3f8f5,#e7f0ec);
+  color:#28483c;
+  border:1px solid #d4e3dc;
+  box-shadow:2px 3px 8px rgba(31,76,59,.05),inset 1px 1px 0 rgba(255,255,255,.9);
+}
+
+.icon-btn,
+.avatar{
+  background:linear-gradient(145deg,#ffffff,#edf5f1);
+  border-color:#d5e3dd;
+  box-shadow:3px 5px 12px rgba(30,72,57,.06),inset 1px 1px 0 #fff;
+}
+
+.location-friendly,
+.coordinates-box,
+.technical-details div{
+  background:#eef6f2;
+  border:1px solid #dbe9e3;
+}
+
+.search-input,
+select{
+  background:#fbfefd;
+  color:var(--ink);
+  border-color:#d6e4de;
+}
+
+.profile-menu,
+.settings-sheet,
+.confirm-sheet{
+  background:linear-gradient(145deg,#fbfefd,#edf6f2);
+  border-color:#d3e4dc;
+  box-shadow:0 25px 70px rgba(23,55,44,.18),inset 1px 1px 0 rgba(255,255,255,.95);
+}
+
+.settings-note{
+  background:#eaf4ef;
+  border:1px solid #d4e5dc;
+}
+
+.reset-sheet{
+  max-width:430px;
+}
+
+.reset-icon{
+  background:linear-gradient(145deg,#e5f4ed,#cde8dc);
+  color:#34745c;
+}
+
+.reset-label{
+  display:block;
+  margin:0 0 7px;
+  color:var(--ink);
+  font-size:11px;
+  font-weight:700;
+}
+
+.reset-input{
+  width:100%;
+  border:1px solid var(--line);
+  border-radius:11px;
+  background:#fbfefd;
+  color:var(--ink);
+  padding:12px 13px;
+  outline:none;
+  box-shadow:inset 2px 2px 5px rgba(30,69,55,.035);
+}
+
+.reset-input:focus{
+  border-color:#8db9a6;
+  box-shadow:0 0 0 3px rgba(63,149,109,.1);
+}
+
+.reset-password-field{
+  margin:0 0 14px;
+}
+
+.reset-password-field .reset-input{
+  margin:0;
+  padding-right:48px;
+}
+
+.reset-password-field + .reset-label{
+  margin-top:4px;
+}
+
+#updatePasswordModal .confirm-actions{
+  margin-top:6px;
+}
+
+@media(max-width:650px){
+  .login-panel{
+    padding:48px 24px 34px;
+  }
+  .login-panel h1{
+    font-size:36px;
+  }
+}
+
+body.dark-mode .password-toggle{
+  color:#a6bcb3;
+}
+
+body.dark-mode .password-toggle:hover{
+  background:#294238;
+  color:#e4f5ee;
+}
+
+body.dark-mode .forgot-password{
+  color:#9fe1c4;
+}
+
+body.dark-mode .forgot-password:hover{
+  color:#d4f5e5;
+}
+
+body.dark-mode .reset-label{
+  color:#edf8f3;
+}
+
+body.dark-mode .reset-input{
+  background:#101d19 !important;
+  color:#f1faf6 !important;
+  border-color:#3a554a !important;
+}
+
+body.dark-mode .reset-input::placeholder{
+  color:#71877e !important;
+}
+
+body.dark-mode .reset-icon{
+  background:linear-gradient(145deg,#294a3d,#1b3028) !important;
+  color:#a8e6cc !important;
+}
