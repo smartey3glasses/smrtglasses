@@ -1022,3 +1022,159 @@ body.dark-mode .login-panel {
 body.dark-mode .forgot-password {
   color: #9fe1c4 !important;
 }
+.settings-head .icon-btn{
+  width:34px !important;
+  height:34px !important;
+  padding:0 !important;
+  border:0 !important;
+  background:transparent !important;
+  box-shadow:none !important;
+  color:#527067 !important;
+}
+.settings-head .icon-btn:hover{
+  background:#e8f2ee !important;
+  color:#214d40 !important;
+  transform:none !important;
+}
+.segmented{
+  gap:2px !important;
+  padding:3px !important;
+}
+.segmented button{
+  width:38px !important;
+  height:34px !important;
+  padding:0 !important;
+  display:grid !important;
+  place-items:center !important;
+  font-size:17px !important;
+}
+.segmented button iconify-icon{
+  font-size:18px !important;
+}
+.segmented button.active{
+  color:#255f4e !important;
+}
+.nav-item.active{
+  color:#245b4b !important;
+  background:linear-gradient(145deg,#d7ebe2,#c9e1d7) !important;
+  box-shadow:inset 1px 1px 0 rgba(255,255,255,.92),0 4px 10px rgba(31,76,59,.09) !important;
+}
+.nav-item.active span,
+.nav-item.active iconify-icon{
+  color:#2f755e !important;
+  text-shadow:none !important;
+}
+.stat-icon,
+.stat-icon.blue,
+.stat-icon.red,
+.stat-icon.green,
+.stat-icon.orange{
+  width:35px !important;
+  height:35px !important;
+  background:transparent !important;
+  border:0 !important;
+  box-shadow:none !important;
+  color:#4f8977 !important;
+}
+.stat-icon.blue{color:#5b9385 !important}
+.stat-icon.red{color:#c87878 !important}
+.stat-icon.green{color:#4e9b7e !important}
+.stat-icon iconify-icon{font-size:23px !important}
+.device-specs div,
+.device-specs div:nth-child(3n){
+  border-right:0 !important;
+}
+.device-specs{
+  grid-template-columns:repeat(2,1fr) !important;
+}
+.device-specs div{
+  padding:15px 12px 5px 0 !important;
+}
+.reset-sheet{
+  max-width:430px !important;
+}
+.reset-sheet .confirm-actions{
+  margin-top:22px !important;
+  gap:10px !important;
+  align-items:center !important;
+}
+.reset-sheet .confirm-actions .secondary-btn,
+.reset-sheet .confirm-actions .primary-btn{
+  width:auto !important;
+  min-height:40px !important;
+  margin-top:0 !important;
+  padding:9px 14px !important;
+  font-size:11px !important;
+  border-radius:11px !important;
+}
+.reset-sheet .confirm-actions .primary-btn{
+  box-shadow:3px 5px 11px rgba(27,58,48,.17),inset 1px 1px 0 rgba(255,255,255,.18) !important;
+}
+.map-preview-badge{
+  margin:10px !important;
+  padding:7px 10px !important;
+  border-radius:999px !important;
+  background:rgba(247,253,250,.94) !important;
+  border:1px solid #c7ded5 !important;
+  color:#477466 !important;
+  font:600 10px/1.2 'DM Sans',sans-serif !important;
+  box-shadow:0 4px 12px rgba(32,72,59,.12) !important;
+}
+.preview-marker{
+  background:transparent !important;
+  border:0 !important;
+}
+.preview-marker span{
+  display:block !important;
+  width:22px !important;
+  height:22px !important;
+  border-radius:50% !important;
+  background:#9fd9c3 !important;
+  border:4px solid rgba(255,255,255,.95) !important;
+  box-shadow:0 3px 12px rgba(39,100,78,.28) !important;
+}
+body.dark-mode .settings-head .icon-btn{
+  color:#a8c6ba !important;
+}
+body.dark-mode .settings-head .icon-btn:hover{
+  background:#29473c !important;
+  color:#e6f0ec !important;
+}
+body.dark-mode .nav-item.active{
+  background:linear-gradient(145deg,#294a3f,#203a31) !important;
+  color:#dff4eb !important;
+}
+body.dark-mode .nav-item.active span,
+body.dark-mode .nav-item.active iconify-icon{
+  color:#8fdbbd !important;
+}
+body.dark-mode .stat-icon,
+body.dark-mode .stat-icon.blue,
+body.dark-mode .stat-icon.red,
+body.dark-mode .stat-icon.green,
+body.dark-mode .stat-icon.orange{
+  background:transparent !important;
+  box-shadow:none !important;
+}
+body.dark-mode .map-preview-badge{
+  background:rgba(25,43,36,.94) !important;
+  border-color:#3a554a !important;
+  color:#a8d9c6 !important;
+}
+@media(max-width:650px){
+  .reset-sheet .confirm-actions{
+    margin-top:22px !important;
+  }
+  .reset-sheet .confirm-actions .secondary-btn,
+  .reset-sheet .confirm-actions .primary-btn{
+    min-height:40px !important;
+    padding:9px 13px !important;
+  }
+  .segmented button{
+    width:36px !important;
+    height:34px !important;
+  }
+  .device-specs{
+    grid-template-columns:1fr 1fr !important;
+  }
+}

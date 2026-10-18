@@ -161,7 +161,7 @@
       <section id="devices" class="page-section">
         <div class="section-heading"><div><span class="panel-kicker">SMART GLASSES</span><h3>How are the glasses doing?</h3><p>A simple status view of the device. Technical details are available below for reference.</p></div></div>
         <div id="deviceCards" class="device-grid"></div>
-        <div class="panel technical-panel"><div class="panel-head"><div><span class="panel-kicker">DEVICE DETAILS</span><h4>Technical information</h4></div><button id="technicalToggle" class="text-btn">Hide details</button></div><div id="technicalDetails" class="technical-details"><div><span>Controller</span><b>ESP32 DevKit V1</b></div><div><span>Obstacle sensors</span><b>3 × VL53L0X</b></div><div><span>Location</span><b>NEO-6M GPS</b></div><div><span>Audio</span><b>VV4 bone-conduction headset</b></div><div><span>Connection</span><b id="technicalConnection">Connected</b></div></div></div>
+        <div class="panel technical-panel"><div class="panel-head"><div><span class="panel-kicker">DEVICE DETAILS</span><h4>Technical information</h4></div><button id="technicalToggle" class="text-btn">Hide details</button></div><div id="technicalDetails" class="technical-details"><div><span>Controller</span><b>ESP32 DevKit V1</b></div><div><span>Obstacle sensors</span><b>VL53L0X obstacle sensors</b></div><div><span>Location</span><b>NEO-6M GPS</b></div><div><span>Audio</span><b>VV4 bone-conduction headset</b></div><div><span>Connection</span><b id="technicalConnection">Connected</b></div></div></div>
       </section>
 
       <section id="access" class="page-section">
@@ -187,7 +187,7 @@
       <div class="settings-head"><div><span class="panel-kicker">PREFERENCES</span><h3 id="settingsTitle">Settings</h3></div><button id="closeSettings" class="icon-btn" aria-label="Close settings"><iconify-icon icon="solar:close-circle-linear"></iconify-icon></button></div>
       <div class="settings-section">
         <span class="settings-label">Appearance</span>
-        <div class="setting-row"><div><b>Theme</b><small>Choose how the dashboard looks.</small></div><div class="segmented" id="themeControl"><button data-theme="light">Light</button><button data-theme="dark">Dark</button></div></div>
+        <div class="setting-row"><div><b>Theme</b><small>Choose how the dashboard looks.</small></div><div class="segmented" id="themeControl"><button data-theme="light" aria-label="Light theme" title="Light theme"><iconify-icon icon="solar:sun-2-linear"></iconify-icon></button><button data-theme="dark" aria-label="Dark theme" title="Dark theme"><iconify-icon icon="solar:moon-linear"></iconify-icon></button></div></div>
       </div>
       <div class="settings-section">
         <span class="settings-label">Language / Wika</span>
