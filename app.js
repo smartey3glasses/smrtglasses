@@ -4,6 +4,7 @@ const APP_REDIRECT_URL = 'https://smrtglasses.vercel.app/';
 let supabaseClient = null;
 let deferredInstallPrompt = null;
 let liveChannel = null;
+let recoveryMode = /(?:^|[#&?])type=recovery(?:&|$)/.test(window.location.hash + window.location.search);
 
 const state = {
   events: [],
@@ -12,7 +13,6 @@ const state = {
   latestLocation: null,
   map: null,
   miniMap: null,
-  previewTimer: null,
   access: []
 };
 
@@ -304,57 +304,8 @@ function renderAccess() {
   });
 }
 
-function clearPreviewTimer() {
-  if (state.previewTimer) {
-    clearInterval(state.previewTimer);
-    state.previewTimer = null;
-  }
-}
-
-function previewCoordinate() {
-  const baseLat = 13.1392;
-  const baseLng = 123.7439;
-  return {
-    latitude: baseLat + (Math.random() - 0.5) * 0.035,
-    longitude: baseLng + (Math.random() - 0.5) * 0.035
-  };
-}
-
-function renderPreviewMap(element, main = false) {
-  if (!window.L) {
-    element.innerHTML = '<div class="empty">Waiting for the glasses to report a location.</div>';
-    return;
-  }
-
-  const existing = main ? state.map : state.miniMap;
-  if (existing) existing.remove();
-
-  const preview = previewCoordinate();
-  const map = L.map(element, { zoomControl: main, attributionControl: true }).setView([preview.latitude, preview.longitude], 15);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '© OpenStreetMap'
-  }).addTo(map);
-
-  L.marker([preview.latitude, preview.longitude], {
-    icon: L.divIcon({
-      className: 'preview-marker',
-      html: '<span></span>',
-      iconSize: [22, 22],
-      iconAnchor: [11, 11]
-    })
-  }).addTo(map).bindPopup('<b>Preview map</b><br><small>Waiting for live location from the glasses.</small>');
-
-  const badge = L.control({ position: 'topleft' });
-  badge.onAdd = function() {
-    const node = L.DomUtil.create('div', 'map-preview-badge');
-    node.textContent = 'Preview · waiting for live location';
-    return node;
-  };
-  badge.addTo(map);
-
-  if (main) state.map = map;
-  else state.miniMap = map;
+function renderMapEmpty(element) {
+  element.innerHTML = '<div class="empty">Waiting for the glasses to report a location.</div>';
 }
 
 function initMap(main = false) {
@@ -363,22 +314,15 @@ function initMap(main = false) {
   const location = state.latestLocation;
 
   if (!location) {
-    renderPreviewMap(element, main);
-    if (!state.previewTimer) {
-      state.previewTimer = setInterval(() => {
-        if (state.latestLocation) {
-          clearPreviewTimer();
-          refreshMaps();
-          return;
-        }
-        initMap(true);
-        initMap(false);
-      }, 10000);
+    const existing = main ? state.map : state.miniMap;
+    if (existing) {
+      existing.remove();
+      if (main) state.map = null;
+      else state.miniMap = null;
     }
+    renderMapEmpty(element);
     return;
   }
-
-  clearPreviewTimer();
 
   const existing = main ? state.map : state.miniMap;
   if (existing) existing.remove();
@@ -582,7 +526,16 @@ function togglePassword() {
 }
 
 function closeUpdatePassword() {
+  if (recoveryMode) return;
   $('updatePasswordModal').classList.add('hidden');
+}
+
+function enterRecoveryMode() {
+  recoveryMode = true;
+  showLogin();
+  $('resetModal').classList.add('hidden');
+  $('updatePasswordModal').classList.remove('hidden');
+  setTimeout(() => $('newPasswordInput').focus(), 80);
 }
 
 function togglePasswordField(inputId, buttonId) {
@@ -614,7 +567,10 @@ async function updatePassword() {
   }
   $('newPasswordInput').value = '';
   $('confirmPasswordInput').value = '';
-  closeUpdatePassword();
+  $('updatePasswordModal').classList.add('hidden');
+  recoveryMode = false;
+  await supabaseClient.auth.signOut();
+  showLogin();
   toast(i18n[currentLang].passwordUpdated);
 }
 
@@ -875,7 +831,7 @@ function bind() {
   $('toggleConfirmPassword').addEventListener('click', () => togglePasswordField('confirmPasswordInput', 'toggleConfirmPassword'));
   $('saveNewPassword').addEventListener('click', updatePassword);
   $('updatePasswordModal').addEventListener('click', event => {
-    if (event.target === $('updatePasswordModal')) closeUpdatePassword();
+    if (event.target === $('updatePasswordModal') && !recoveryMode) closeUpdatePassword();
   });
   $('resetModal').addEventListener('click', event => {
     if (event.target === $('resetModal')) closeReset();
@@ -1022,14 +978,18 @@ bind();
   supabaseClient = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
   supabaseClient.auth.onAuthStateChange((event) => {
     if (event === 'PASSWORD_RECOVERY') {
-      $('updatePasswordModal').classList.remove('hidden');
-      setTimeout(() => $('newPasswordInput').focus(), 50);
+      enterRecoveryMode();
     }
   });
   const { data, error } = await supabaseClient.auth.getSession();
 
   if (error) {
     toast(error.message);
+    return;
+  }
+
+  if (recoveryMode) {
+    enterRecoveryMode();
     return;
   }
 
