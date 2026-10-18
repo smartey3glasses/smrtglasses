@@ -1178,3 +1178,45 @@ body.dark-mode .map-preview-badge{
     grid-template-columns:1fr 1fr !important;
   }
 }
+
+
+/* Native-control replacement */
+.custom-select{position:relative;min-width:170px;z-index:30}
+.custom-select-trigger{width:100%;min-height:40px;border:1px solid #d6e4de;border-radius:12px;background:linear-gradient(145deg,#fbfefd,#edf5f1);color:var(--ink);padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:11px;font-weight:700;box-shadow:var(--inset-shadow)}
+.custom-select-trigger iconify-icon{font-size:16px;color:#6f8b81;transition:transform .18s ease}
+.custom-select.open .custom-select-trigger iconify-icon{transform:rotate(180deg)}
+.custom-select-menu{position:absolute;top:calc(100% + 7px);left:0;right:0;padding:6px;border:1px solid #d3e4dc;border-radius:15px;background:linear-gradient(145deg,#fbfefd,#edf6f2);box-shadow:0 18px 40px rgba(23,55,44,.16),inset 1px 1px 0 rgba(255,255,255,.95);opacity:0;visibility:hidden;transform:translateY(-5px) scale(.98);transform-origin:top;transition:opacity .16s ease,transform .16s ease,visibility .16s;z-index:100}
+.custom-select.open .custom-select-menu{opacity:1;visibility:visible;transform:none}
+.custom-option{width:100%;border:0;background:transparent;color:#526960;border-radius:10px;padding:10px 9px;display:flex;align-items:center;justify-content:space-between;gap:10px;text-align:left;font-size:10px;font-weight:600}
+.custom-option iconify-icon{font-size:15px;opacity:0;color:#438a70}
+.custom-option:hover,.custom-option:focus{background:#e8f3ee;color:#21483e;outline:none}
+.custom-option.active{background:#e4f1eb;color:#21483e;font-weight:800}
+.custom-option.active iconify-icon{opacity:1}
+#severityFilter{display:none}
+.modal-overlay{position:fixed;inset:0;background:rgba(20,42,35,.28);backdrop-filter:blur(5px);z-index:11000;display:grid;place-items:center;padding:20px}
+.form-modal{width:min(440px,100%);padding:24px;border:1px solid rgba(151,183,171,.55);border-radius:24px;background:linear-gradient(145deg,#fbfefd,#edf6f2);box-shadow:0 25px 70px rgba(17,47,38,.25),inset 1px 1px 0 rgba(255,255,255,.95)}
+.form-modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:10px}
+.form-modal-head h3{font-size:22px;margin:5px 0 0}
+.form-modal-copy{margin:0 0 20px;color:#71817a;font-size:11px;line-height:1.6}
+.modal-close{flex:none}
+.modal-field-label{display:block;margin:0 0 8px;color:var(--ink);font-size:11px;font-weight:800}
+.modal-input{width:100%;height:44px;border:1px solid #cbded5;border-radius:12px;background:#f8fcfa;color:var(--ink);padding:0 13px;outline:none;box-shadow:var(--inset-shadow);font-size:11px}
+.modal-input:focus{border-color:#7bbca8;box-shadow:inset 2px 2px 5px rgba(46,79,69,.08),inset -2px -2px 5px rgba(255,255,255,.9),0 0 0 3px rgba(102,177,151,.14)}
+.modal-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:22px}
+.modal-actions .primary-btn,.modal-actions .secondary-btn{min-height:38px;padding:9px 13px;font-size:10px}
+body.dark-mode .custom-select-trigger,body.dark-mode .custom-select-menu,body.dark-mode .form-modal{background:linear-gradient(145deg,#1a2c25,#13221e);border-color:#345047;color:#eef8f4}
+body.dark-mode .custom-option{color:#afc1b9}
+body.dark-mode .custom-option:hover,body.dark-mode .custom-option:focus,body.dark-mode .custom-option.active{background:#263f35;color:#eff9f5}
+body.dark-mode .modal-input{background:#14231e;border-color:#345047;color:#eff9f5}
+body.dark-mode .form-modal-copy{color:#9fb3aa}
+body.dark-mode .modal-field-label{color:#eff9f5}
+@media(max-width:650px){.filter-row .custom-select{flex:1;min-width:150px}.form-modal{padding:20px;border-radius:20px}.modal-actions{margin-top:20px}.modal-actions .primary-btn,.modal-actions .secondary-btn{flex:1}}
+
+/* Settings controls */
+#themeControl button{width:38px !important;height:34px !important;padding:0 !important;display:grid !important;place-items:center !important;font-size:0 !important}
+#themeControl button iconify-icon{font-size:18px !important}
+#languageControl button{width:auto !important;min-width:74px !important;height:34px !important;padding:0 11px !important;font-size:9px !important;display:grid !important;place-items:center !important}
+#themeControl button.active{color:#255f4e !important}
+#languageControl button.active{color:#255f4e !important}
+body.dark-mode #themeControl button.active{color:#b8ecd6 !important}
+body.dark-mode #languageControl button.active{color:#e6f0ec !important}

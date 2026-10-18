@@ -624,18 +624,35 @@ async function logout() {
   showLogin();
 }
 
+function openFamilyAccess() {
+  if (!state.device) {
+    toast('No device is assigned.');
+    return;
+  }
+  $('familyEmailInput').value = '';
+  $('familyAccessModal').classList.remove('hidden');
+  requestAnimationFrame(() => $('familyEmailInput').focus());
+}
+
+function closeFamilyAccess() {
+  $('familyAccessModal').classList.add('hidden');
+}
+
 async function addAccess() {
   if (!state.device) {
     toast('No device is assigned.');
     return;
   }
 
-  const email = prompt('Enter the family member or caregiver email.');
-  if (!email?.trim()) return;
+  const email = $('familyEmailInput').value.trim();
+  if (!email) {
+    $('familyEmailInput').focus();
+    return;
+  }
 
   const { error } = await supabaseClient.rpc('grant_device_access', {
     p_device_id: state.device.id,
-    p_email: email.trim()
+    p_email: email
   });
 
   if (error) {
@@ -643,8 +660,33 @@ async function addAccess() {
     return;
   }
 
+  closeFamilyAccess();
   await loadData();
   toast('Access granted.');
+}
+
+function setSeverity(value) {
+  const option = document.querySelector(`#severityPickerMenu .custom-option[data-value="${value}"]`);
+  if (!option) return;
+  $('severityFilter').value = value;
+  $('severityPickerLabel').textContent = option.querySelector('span').textContent;
+  document.querySelectorAll('#severityPickerMenu .custom-option').forEach(item => {
+    const active = item.dataset.value === value;
+    item.classList.toggle('active', active);
+    item.setAttribute('aria-selected', active ? 'true' : 'false');
+  });
+  closeSeverityPicker();
+  renderEvents();
+}
+
+function openSeverityPicker() {
+  $('severityPicker').classList.add('open');
+  $('severityPickerTrigger').setAttribute('aria-expanded', 'true');
+}
+
+function closeSeverityPicker() {
+  $('severityPicker').classList.remove('open');
+  $('severityPickerTrigger').setAttribute('aria-expanded', 'false');
 }
 
 async function revokeAccess(userId) {
@@ -755,8 +797,13 @@ function applyLanguage() {
   }
 
   const themeButtons = document.querySelectorAll('#themeControl button');
-  if (themeButtons[0]) themeButtons[0].textContent = text.light;
-  if (themeButtons[1]) themeButtons[1].textContent = text.dark;
+  themeButtons.forEach(button => {
+    const isLight = button.dataset.theme === 'light';
+    const label = isLight ? text.light : text.dark;
+    button.setAttribute('aria-label', label);
+    button.setAttribute('title', label);
+    button.setAttribute('aria-pressed', button.dataset.theme === currentTheme ? 'true' : 'false');
+  });
 
   const languageButtons = document.querySelectorAll('#languageControl button');
   if (languageButtons[0]) languageButtons[0].textContent = text.english;
@@ -769,7 +816,10 @@ function applyLanguage() {
   if (note) note.textContent = text.note;
 
   document.documentElement.lang = currentLang === 'fil' ? 'fil' : 'en';
-  languageButtons.forEach(button => button.classList.toggle('active', button.dataset.lang === currentLang));
+  languageButtons.forEach(button => {
+    button.classList.toggle('active', button.dataset.lang === currentLang);
+    button.setAttribute('aria-pressed', button.dataset.lang === currentLang ? 'true' : 'false');
+  });
 }
 
 function openProfile() {
@@ -848,11 +898,35 @@ function bind() {
     button.addEventListener('click', () => go(button.dataset.sectionJump));
   });
   $('eventSearch').addEventListener('input', renderEvents);
-  $('severityFilter').addEventListener('change', renderEvents);
+  $('severityPickerTrigger').addEventListener('click', () => {
+    $('severityPicker').classList.contains('open') ? closeSeverityPicker() : openSeverityPicker();
+  });
+  document.querySelectorAll('#severityPickerMenu .custom-option').forEach(option => {
+    option.addEventListener('click', () => setSeverity(option.dataset.value));
+  });
+  document.addEventListener('click', event => {
+    if (!$('severityPicker').contains(event.target)) closeSeverityPicker();
+  });
+  $('severityPickerTrigger').addEventListener('keydown', event => {
+    if (event.key === 'ArrowDown' || event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      openSeverityPicker();
+    }
+  });
   $('clearFilterBtn').addEventListener('click', () => {
     $('eventSearch').value = '';
-    $('severityFilter').value = 'all';
-    renderEvents();
+    setSeverity('all');
+  });
+  $('addAccessBtn').addEventListener('click', openFamilyAccess);
+  $('closeFamilyAccess').addEventListener('click', closeFamilyAccess);
+  $('cancelFamilyAccess').addEventListener('click', closeFamilyAccess);
+  $('confirmFamilyAccess').addEventListener('click', addAccess);
+  $('familyEmailInput').addEventListener('keydown', event => {
+    if (event.key === 'Enter') addAccess();
+    if (event.key === 'Escape') closeFamilyAccess();
+  });
+  $('familyAccessModal').addEventListener('click', event => {
+    if (event.target === $('familyAccessModal')) closeFamilyAccess();
   });
   $('openMapsBtn').addEventListener('click', () => {
     const location = state.latestLocation;
@@ -998,3 +1072,4 @@ bind();
     await loadData();
   }
 })();
+

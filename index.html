@@ -153,7 +153,7 @@
       <section id="events" class="page-section">
         <div class="section-heading"><div><span class="panel-kicker">RECENT ALERTS</span><h3>Obstacle alerts</h3><p>See when the glasses detected an obstacle while your relative was walking.</p></div></div>
         <div class="alert-summary"><div><span>Alerts today</span><strong id="alertsTotal">4</strong></div><div><span>Latest alert</span><strong id="latestAlertText">2 min ago</strong></div></div>
-        <div class="filter-row"><input id="eventSearch" class="search-input" placeholder="Search alerts…" /><select id="severityFilter"><option value="all">All alerts</option><option value="High">More urgent</option><option value="Medium">Moderate</option><option value="Low">Less urgent</option></select><button id="clearFilterBtn" class="secondary-btn">Reset</button></div>
+        <div class="filter-row"><input id="eventSearch" class="search-input" placeholder="Search alerts…" /><div class="custom-select" id="severityPicker"><button class="custom-select-trigger" id="severityPickerTrigger" type="button" aria-haspopup="listbox" aria-expanded="false"><span id="severityPickerLabel">All alerts</span><iconify-icon icon="solar:alt-arrow-down-linear"></iconify-icon></button><div class="custom-select-menu" id="severityPickerMenu" role="listbox" aria-label="Alert severity"><button type="button" class="custom-option active" data-value="all" role="option" aria-selected="true"><span>All alerts</span><iconify-icon icon="solar:check-circle-linear"></iconify-icon></button><button type="button" class="custom-option" data-value="High" role="option" aria-selected="false"><span>More urgent</span><iconify-icon icon="solar:check-circle-linear"></iconify-icon></button><button type="button" class="custom-option" data-value="Medium" role="option" aria-selected="false"><span>Moderate</span><iconify-icon icon="solar:check-circle-linear"></iconify-icon></button><button type="button" class="custom-option" data-value="Low" role="option" aria-selected="false"><span>Less urgent</span><iconify-icon icon="solar:check-circle-linear"></iconify-icon></button></div><input type="hidden" id="severityFilter" value="all" /></div><button id="clearFilterBtn" class="secondary-btn">Reset</button></div>
         <div class="panel table-panel"><div id="eventsTable" class="table-wrap"></div></div>
         <p class="plain-note"><iconify-icon icon="solar:info-circle-linear"></iconify-icon> Alerts show what the glasses detected.</p>
       </section>
@@ -171,6 +171,16 @@
     </main>
   </div>
   
+  <div id="familyAccessModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="familyAccessTitle">
+    <div class="form-modal">
+      <div class="form-modal-head"><div><span class="panel-kicker">FAMILY ACCESS</span><h3 id="familyAccessTitle">Add family member</h3></div><button id="closeFamilyAccess" class="icon-btn modal-close" type="button" aria-label="Close"><iconify-icon icon="solar:close-circle-linear"></iconify-icon></button></div>
+      <p class="form-modal-copy">Enter the email address of someone who should be able to view the location and alerts.</p>
+      <label class="modal-field-label" for="familyEmailInput">Email address</label>
+      <input id="familyEmailInput" class="modal-input" type="email" autocomplete="email" placeholder="name@example.com" />
+      <div class="modal-actions"><button id="cancelFamilyAccess" class="secondary-btn" type="button">Cancel</button><button id="confirmFamilyAccess" class="primary-btn" type="button">Add member</button></div>
+    </div>
+  </div>
+
   <div id="profileMenu" class="profile-menu hidden" role="dialog" aria-label="Profile menu">
     <div class="profile-card-head">
       <div class="profile-avatar"><iconify-icon icon="solar:user-linear"></iconify-icon></div>
@@ -187,11 +197,11 @@
       <div class="settings-head"><div><span class="panel-kicker">PREFERENCES</span><h3 id="settingsTitle">Settings</h3></div><button id="closeSettings" class="icon-btn" aria-label="Close settings"><iconify-icon icon="solar:close-circle-linear"></iconify-icon></button></div>
       <div class="settings-section">
         <span class="settings-label">Appearance</span>
-        <div class="setting-row"><div><b>Theme</b><small>Choose how the dashboard looks.</small></div><div class="segmented" id="themeControl"><button data-theme="light" aria-label="Light theme" title="Light theme"><iconify-icon icon="solar:sun-2-linear"></iconify-icon></button><button data-theme="dark" aria-label="Dark theme" title="Dark theme"><iconify-icon icon="solar:moon-linear"></iconify-icon></button></div></div>
+        <div class="setting-row"><div><b>Theme</b><small>Choose how the dashboard looks.</small></div><div class="segmented theme-control" id="themeControl"><button data-theme="light" aria-label="Light theme" title="Light theme" aria-pressed="true"><iconify-icon icon="solar:sun-2-linear"></iconify-icon></button><button data-theme="dark" aria-label="Dark theme" title="Dark theme" aria-pressed="false"><iconify-icon icon="solar:moon-linear"></iconify-icon></button></div></div>
       </div>
       <div class="settings-section">
         <span class="settings-label">Language / Wika</span>
-        <div class="setting-row"><div><b>Language</b><small>English or Filipino.</small></div><div class="segmented" id="languageControl"><button data-lang="en">English</button><button data-lang="fil">Filipino</button></div></div>
+        <div class="setting-row"><div><b>Language</b><small>English or Filipino.</small></div><div class="segmented language-control" id="languageControl"><button data-lang="en" aria-pressed="true">English</button><button data-lang="fil" aria-pressed="false">Filipino</button></div></div>
       </div>
       <div class="settings-note"><iconify-icon icon="solar:info-circle-linear"></iconify-icon><span>Language changes the caregiver-facing labels and controls. Device technical terms stay in their original names.</span></div>
     </div>
