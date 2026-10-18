@@ -1,0 +1,23 @@
+SMART EYEGLASSES - PASSWORD RESET REDIRECT SETUP
+
+Current production URL:
+https://smrtglasses.vercel.app/
+
+In Supabase Dashboard:
+Authentication -> URL Configuration
+
+Set Site URL to:
+https://smrtglasses.vercel.app/
+
+Add this exact Redirect URL:
+https://smrtglasses.vercel.app/
+
+If the Reset Password email template was customized, make sure its reset button uses:
+{{ .ConfirmationURL }}
+
+Do not hardcode the old Vercel domain (glasses-smartglasses.vercel.app) in the template.
+
+The app now sends password reset requests to:
+https://smrtglasses.vercel.app/
+
+The app listens for the Supabase PASSWORD_RECOVERY event and opens the new-password screen automatically.

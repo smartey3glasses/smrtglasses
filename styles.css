@@ -941,3 +941,84 @@ body.dark-mode .reset-icon{
   background:linear-gradient(145deg,#294a3d,#1b3028) !important;
   color:#a8e6cc !important;
 }
+
+.logo-mark,
+.logo-mark.small,
+.login-panel .brand-mark.logo-mark {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  overflow: visible !important;
+}
+.login-panel .brand-mark.logo-mark {
+  width: 96px !important;
+  height: 58px !important;
+  margin-bottom: 24px !important;
+}
+.brand-mark.small.logo-mark {
+  width: 48px !important;
+  height: 34px !important;
+  margin: 0 !important;
+}
+.logo-mark img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  filter: none !important;
+}
+.password-toggle {
+  width: 38px !important;
+  height: 38px !important;
+  right: 5px !important;
+  border-radius: 10px !important;
+}
+.login-form .password-field input {
+  padding-right: 52px !important;
+}
+.forgot-password {
+  margin-top: -7px !important;
+  padding: 4px 1px !important;
+}
+.reset-sheet {
+  border-radius: 22px !important;
+}
+body.dark-mode .logo-mark,
+body.dark-mode .logo-mark.small,
+body.dark-mode .login-panel .brand-mark.logo-mark {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+body.dark-mode .password-toggle:hover {
+  background: #294238 !important;
+}
+body.dark-mode .login-form input {
+  background: #101d19 !important;
+  color: #f1faf6 !important;
+  border-color: #3a554a !important;
+}
+body.dark-mode .login-form input::placeholder {
+  color: #71877e !important;
+}
+body.dark-mode .login-panel h1 {
+  color: #eff9f5 !important;
+  text-shadow: none !important;
+}
+body.dark-mode .login-panel h1 span {
+  color: #8bd5ba !important;
+  text-shadow: none !important;
+}
+body.dark-mode .login-panel:before {
+  background: #2a493f !important;
+  box-shadow: none !important;
+}
+body.dark-mode .login-view {
+  background: radial-gradient(circle at 20% 0%, #1b332b 0, #0d1714 58%, #09110f 100%) !important;
+}
+body.dark-mode .login-panel {
+  box-shadow: inset -1px 0 0 #263f36 !important;
+}
+body.dark-mode .forgot-password {
+  color: #9fe1c4 !important;
+}

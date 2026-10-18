@@ -1,5 +1,6 @@
 const $ = id => document.getElementById(id);
 
+const APP_REDIRECT_URL = 'https://smrtglasses.vercel.app/';
 let supabaseClient = null;
 let deferredInstallPrompt = null;
 let liveChannel = null;
@@ -572,7 +573,7 @@ async function sendPasswordReset() {
     return;
   }
   const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
-    redirectTo: `${window.location.origin}${window.location.pathname}`
+    redirectTo: APP_REDIRECT_URL
   });
   if (error) {
     toast(error.message);
