@@ -399,14 +399,36 @@ async function loadData() {
     $('profileEmail').textContent = user.email || '';
     $('userName').textContent = user.user_metadata?.name || user.email?.split('@')[0] || 'Caregiver';
 
-    const { data: devices, error: deviceError } = await supabaseClient
-      .from('devices')
-      .select('*')
-      .order('created_at', { ascending: true })
-      .limit(1);
+    const [ownedDevicesResult, accessRowsResult] = await Promise.all([
+      supabaseClient
+        .from('devices')
+        .select('*')
+        .eq('owner_user_id', user.id)
+        .order('created_at', { ascending: true }),
+      supabaseClient
+        .from('device_access')
+        .select('device_id')
+        .eq('user_id', user.id)
+    ]);
 
-    if (deviceError) throw deviceError;
-    const device = devices?.[0];
+    if (ownedDevicesResult.error) throw ownedDevicesResult.error;
+
+    const accessibleDeviceIds = [...new Set((accessRowsResult.data || []).map(row => row.device_id).filter(Boolean))];
+    let accessibleDevices = ownedDevicesResult.data || [];
+
+    if (accessibleDeviceIds.length) {
+      const { data: sharedDevices, error: sharedDevicesError } = await supabaseClient
+        .from('devices')
+        .select('*')
+        .in('id', accessibleDeviceIds);
+
+      if (sharedDevicesError) throw sharedDevicesError;
+      const byId = new Map(accessibleDevices.map(item => [item.id, item]));
+      (sharedDevices || []).forEach(item => byId.set(item.id, item));
+      accessibleDevices = [...byId.values()];
+    }
+
+    const device = accessibleDevices[0] || null;
 
     if (!device) {
       state.device = null;
@@ -437,9 +459,9 @@ async function loadData() {
       supabaseClient.rpc('list_device_access', { p_device_id: device.id })
     ]);
 
-    if (locationsResult.error) throw locationsResult.error;
-    if (eventsResult.error) throw eventsResult.error;
-    if (accessResult.error) throw accessResult.error;
+    if (locationsResult.error) throw new Error(`Unable to read locations: ${locationsResult.error.message}`);
+    if (eventsResult.error) throw new Error(`Unable to read obstacle_events: ${eventsResult.error.message}`);
+    if (accessResult.error) throw new Error(`Unable to read family access: ${accessResult.error.message}`);
 
     state.locations = locationsResult.data || [];
     state.latestLocation = state.locations[0] || null;
@@ -449,6 +471,9 @@ async function loadData() {
       return location ? { ...event, latitude: location.latitude, longitude: location.longitude } : event;
     });
     state.access = accessResult.data || [];
+    console.info('[DASHBOARD] Loaded device:', device.id);
+    console.info('[DASHBOARD] Loaded obstacle events:', state.events.length);
+    console.info('[DASHBOARD] Loaded locations:', state.locations.length);
 
     subscribeToDevice(device.id);
   } catch (error) {
