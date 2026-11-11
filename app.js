@@ -6,6 +6,9 @@ let deferredInstallPrompt = null;
 let liveChannel = null;
 let recoveryMode = /(?:^|[#&?])type=recovery(?:&|$)/.test(window.location.hash + window.location.search);
 let statusRefreshTimer = null;
+let liveDeviceId = null;
+let claimAttemptedUserId = null;
+let isLoadingData = false;
 
 const state = {
   events: [],
@@ -214,15 +217,33 @@ function uiDistanceMeters(row) {
   return row?.distance_cm != null ? Number(row.distance_cm) / 100 : 0;
 }
 
-function effectiveStatus() {
-  const lastSeen = state.device?.last_seen_at || state.device?.updated_at || null;
-  if (!lastSeen) return 'offline';
-  const age = Date.now() - new Date(lastSeen).getTime();
-  return Number.isFinite(age) && age <= 90000 ? 'online' : 'offline';
+function latestDeviceUpdate() {
+  const candidates = [
+    state.device?.last_seen_at,
+    state.device?.updated_at,
+    recordTime(state.events[0]),
+    recordTime(state.latestLocation)
+  ].filter(Boolean);
+
+  if (!candidates.length) return null;
+
+  const latest = candidates
+    .map(value => ({ value, time: new Date(value).getTime() }))
+    .filter(item => Number.isFinite(item.time))
+    .sort((a, b) => b.time - a.time)[0];
+
+  return latest?.value || null;
 }
 
-function latestDeviceUpdate() {
-  return state.device?.last_seen_at || state.device?.updated_at || null;
+function effectiveStatus() {
+  const lastSignal = latestDeviceUpdate();
+  if (lastSignal) {
+    const age = Date.now() - new Date(lastSignal).getTime();
+    return Number.isFinite(age) && age <= 120000 ? 'online' : 'offline';
+  }
+
+  const storedStatus = String(state.device?.status || state.device?.device_status || '').toLowerCase();
+  return ['online', 'connected', 'active'].includes(storedStatus) ? 'online' : 'offline';
 }
 
 function currentDeviceName() {
@@ -253,8 +274,8 @@ function renderStats() {
   $('locationAvailability').textContent = location ? 'Available' : 'Waiting';
   $('locationMeta').textContent = location ? `Updated ${fmtAgo(updated)}` : 'No telemetry received';
   $('deviceStatus').textContent = status;
-  $('deviceStatusMeta').textContent = deviceUpdated ? `Last device signal ${fmtAgo(deviceUpdated)}` : 'No heartbeat received';
-  $('relativeStatus').textContent = deviceUpdated ? `${status} · updated ${fmtAgo(deviceUpdated)}` : `${status} · no heartbeat`;
+  $('deviceStatusMeta').textContent = deviceUpdated ? `Last telemetry ${fmtAgo(deviceUpdated)}` : 'No device telemetry received';
+  $('relativeStatus').textContent = deviceUpdated ? `${status} · telemetry ${fmtAgo(deviceUpdated)}` : `${status} · waiting for telemetry`;
   $('locationTime').textContent = fmtDate(updated);
   $('locationUpdated').textContent = fmtAgo(updated);
   $('locationDevice').textContent = currentDeviceName();
@@ -389,8 +410,12 @@ function refreshMaps() {
   if (activeSection === 'location') setTimeout(() => initMap(true), 80);
 }
 
-async function loadData() {
-  if (!supabaseClient) return;
+async function loadData(options = {}) {
+  if (!supabaseClient || isLoadingData) return;
+
+  const quiet = options.quiet === true;
+  const attemptClaim = options.attemptClaim !== false;
+  isLoadingData = true;
 
   try {
     const { data: userData, error: userError } = await supabaseClient.auth.getUser();
@@ -406,9 +431,22 @@ async function loadData() {
     $('profileEmail').textContent = user.email || '';
     $('userName').textContent = user.user_metadata?.name || user.email?.split('@')[0] || 'Caregiver';
 
-    const { data: claimedDeviceId, error: claimError } = await supabaseClient.rpc('claim_first_unassigned_device');
-    if (claimError) throw new Error(`Automatic device setup failed: ${claimError.message}`);
-    if (claimedDeviceId) console.info('[DASHBOARD] Automatically claimed device:', claimedDeviceId);
+    let claimedDeviceId = null;
+    let claimSetupError = null;
+    if (attemptClaim && claimAttemptedUserId !== user.id) {
+      const claimResult = await supabaseClient.rpc('claim_first_unassigned_device');
+      if (claimResult.error) {
+        claimAttemptedUserId = null;
+        claimSetupError = claimResult.error.message;
+        console.warn('[DASHBOARD] Automatic device claim is unavailable; continuing with existing account access:', claimResult.error.message);
+      } else {
+        claimAttemptedUserId = user.id;
+        claimedDeviceId = typeof claimResult.data === 'string'
+          ? claimResult.data
+          : claimResult.data?.id || null;
+        if (claimedDeviceId) console.info('[DASHBOARD] Device claim returned:', claimedDeviceId);
+      }
+    }
 
     const [ownedDevicesResult, accessRowsResult] = await Promise.all([
       supabaseClient
@@ -422,11 +460,16 @@ async function loadData() {
         .eq('user_id', user.id)
     ]);
 
-    if (ownedDevicesResult.error) throw ownedDevicesResult.error;
-    if (accessRowsResult.error) throw new Error(`Unable to read device access: ${accessRowsResult.error.message}`);
+    if (ownedDevicesResult.error) {
+      throw new Error(`Unable to read your assigned device: ${ownedDevicesResult.error.message}`);
+    }
 
-    const accessibleDeviceIds = [...new Set((accessRowsResult.data || []).map(row => row.device_id).filter(Boolean))];
     let accessibleDevices = ownedDevicesResult.data || [];
+    const accessibleDeviceIds = [...new Set((accessRowsResult.data || []).map(row => row.device_id).filter(Boolean))];
+
+    if (accessRowsResult.error) {
+      console.warn('[DASHBOARD] Family device links could not be listed directly:', accessRowsResult.error.message);
+    }
 
     if (accessibleDeviceIds.length) {
       const { data: sharedDevices, error: sharedDevicesError } = await supabaseClient
@@ -434,10 +477,59 @@ async function loadData() {
         .select('*')
         .in('id', accessibleDeviceIds);
 
-      if (sharedDevicesError) throw sharedDevicesError;
-      const byId = new Map(accessibleDevices.map(item => [item.id, item]));
-      (sharedDevices || []).forEach(item => byId.set(item.id, item));
-      accessibleDevices = [...byId.values()];
+      if (sharedDevicesError) {
+        console.warn('[DASHBOARD] Shared devices could not be loaded:', sharedDevicesError.message);
+      } else {
+        const byId = new Map(accessibleDevices.map(item => [item.id, item]));
+        (sharedDevices || []).forEach(item => byId.set(item.id, item));
+        accessibleDevices = [...byId.values()];
+      }
+    }
+
+    if (!accessibleDevices.length && claimedDeviceId) {
+      const { data: claimedDevice, error: claimedDeviceError } = await supabaseClient
+        .from('devices')
+        .select('*')
+        .eq('id', claimedDeviceId)
+        .maybeSingle();
+
+      if (claimedDeviceError) {
+        console.warn('[DASHBOARD] Claimed device could not be read:', claimedDeviceError.message);
+      } else if (claimedDevice) {
+        accessibleDevices = [claimedDevice];
+      }
+    }
+
+    // Last-resort discovery is still protected by the user's Supabase RLS policies.
+    // It helps when telemetry is readable but the device_access list is not.
+    if (!accessibleDevices.length) {
+      const [recentEventResult, recentLocationResult] = await Promise.all([
+        supabaseClient
+          .from('obstacle_events')
+          .select('device_id')
+          .order('timestamp', { ascending: false })
+          .limit(1),
+        supabaseClient
+          .from('locations')
+          .select('device_id')
+          .order('timestamp', { ascending: false })
+          .limit(1)
+      ]);
+
+      const telemetryDeviceId = recentEventResult.data?.[0]?.device_id || recentLocationResult.data?.[0]?.device_id || null;
+      if (telemetryDeviceId) {
+        const { data: telemetryDevice, error: telemetryDeviceError } = await supabaseClient
+          .from('devices')
+          .select('*')
+          .eq('id', telemetryDeviceId)
+          .maybeSingle();
+
+        if (telemetryDeviceError) {
+          console.warn('[DASHBOARD] Device found through readable telemetry, but its record is not readable:', telemetryDeviceError.message);
+        } else if (telemetryDevice && telemetryDevice.owner_user_id === user.id) {
+          accessibleDevices = [telemetryDevice];
+        }
+      }
     }
 
     const device = accessibleDevices[0] || null;
@@ -448,8 +540,18 @@ async function loadData() {
       state.events = [];
       state.latestLocation = null;
       state.access = [];
+      if (liveChannel) supabaseClient.removeChannel(liveChannel);
+      liveChannel = null;
+      liveDeviceId = null;
+      if (statusRefreshTimer) clearInterval(statusRefreshTimer);
+      statusRefreshTimer = null;
       renderAll();
-      toast('No unassigned Smart Glasses device is available for this account.');
+      if (!quiet) {
+        toast(claimSetupError
+          ? `Automatic device linking is unavailable: ${claimSetupError}`
+          : 'No device is linked to this account yet. Check that the device is assigned to this account or shared with it in Supabase.');
+      }
+      console.warn('[DASHBOARD] No device is visible to the signed-in account. Check owner_user_id, device_access, and the devices SELECT policy.');
       return;
     }
 
@@ -471,47 +573,71 @@ async function loadData() {
       supabaseClient.rpc('list_device_access', { p_device_id: device.id })
     ]);
 
-    if (locationsResult.error) throw new Error(`Unable to read locations: ${locationsResult.error.message}`);
-    if (eventsResult.error) throw new Error(`Unable to read obstacle_events: ${eventsResult.error.message}`);
-    if (accessResult.error) throw new Error(`Unable to read family access: ${accessResult.error.message}`);
+    if (locationsResult.error) {
+      console.warn('[DASHBOARD] Location history could not be loaded:', locationsResult.error.message);
+    } else {
+      state.locations = locationsResult.data || [];
+    }
 
-    state.locations = locationsResult.data || [];
+    if (eventsResult.error) {
+      console.error('[DASHBOARD] Obstacle events could not be loaded:', eventsResult.error.message);
+      if (!quiet) toast(`Obstacle events could not be loaded: ${eventsResult.error.message}`);
+    } else {
+      state.events = eventsResult.data || [];
+    }
+
     state.latestLocation = state.locations[0] || null;
     const locationById = Object.fromEntries(state.locations.map(location => [location.id, location]));
-    state.events = (eventsResult.data || []).map(event => {
+    state.events = state.events.map(event => {
       const location = locationById[event.location_id];
       return location ? { ...event, latitude: location.latitude, longitude: location.longitude } : event;
     });
-    state.access = accessResult.data || [];
+
+    if (accessResult.error) {
+      console.warn('[DASHBOARD] Family access list could not be loaded:', accessResult.error.message);
+      state.access = [];
+    } else {
+      state.access = accessResult.data || [];
+    }
+
     console.info('[DASHBOARD] Loaded device:', device.id);
     console.info('[DASHBOARD] Loaded obstacle events:', state.events.length);
     console.info('[DASHBOARD] Loaded locations:', state.locations.length);
+    console.info('[DASHBOARD] Loaded family access entries:', state.access.length);
 
     subscribeToDevice(device.id);
     if (statusRefreshTimer) clearInterval(statusRefreshTimer);
     statusRefreshTimer = setInterval(() => {
-      if (state.device) {
-        renderStats();
-        renderDevices();
-      }
-    }, 10000);
+      if (state.device) loadData({ quiet: true, attemptClaim: false });
+    }, 30000);
   } catch (error) {
-    console.error(error);
-    state.device = null;
-    state.locations = [];
-    state.events = [];
-    state.latestLocation = null;
-    state.access = [];
-    toast(error.message || 'Unable to load live data.');
+    console.error('[DASHBOARD] Data loading failed:', error);
+    if (!quiet) toast(error.message || 'Unable to load live data.');
+    if (!state.device) {
+      state.locations = [];
+      state.events = [];
+      state.latestLocation = null;
+      state.access = [];
+    }
+  } finally {
+    isLoadingData = false;
+    renderAll();
   }
+}
 
-  renderAll();
+function upsertNewestRecord(collection, row, limit) {
+  if (!row) return collection;
+  const next = [row, ...collection.filter(item => item.id !== row.id)];
+  next.sort((a, b) => new Date(recordTime(b) || 0).getTime() - new Date(recordTime(a) || 0).getTime());
+  return next.slice(0, limit);
 }
 
 function subscribeToDevice(deviceId) {
-  if (!supabaseClient?.channel) return;
+  if (!supabaseClient?.channel || !deviceId) return;
+  if (liveChannel && liveDeviceId === deviceId) return;
 
   if (liveChannel) supabaseClient.removeChannel(liveChannel);
+  liveDeviceId = deviceId;
 
   liveChannel = supabaseClient
     .channel(`dashboard-live-${deviceId}`)
@@ -521,8 +647,8 @@ function subscribeToDevice(deviceId) {
       table: 'obstacle_events',
       filter: `device_id=eq.${deviceId}`
     }, payload => {
-      state.events.unshift(payload.new);
-      loadData();
+      state.events = upsertNewestRecord(state.events, payload.new, 100);
+      renderAll();
       toast('New obstacle alert received.');
     })
     .on('postgres_changes', {
@@ -531,9 +657,8 @@ function subscribeToDevice(deviceId) {
       table: 'locations',
       filter: `device_id=eq.${deviceId}`
     }, payload => {
-      state.locations.unshift(payload.new);
-      state.locations = state.locations.slice(0, 50);
-      state.latestLocation = payload.new;
+      state.locations = upsertNewestRecord(state.locations, payload.new, 50);
+      state.latestLocation = state.locations[0] || null;
       renderAll();
       toast('Location updated.');
     })
@@ -546,7 +671,13 @@ function subscribeToDevice(deviceId) {
       state.device = payload.new;
       renderAll();
     })
-    .subscribe();
+    .subscribe((status, error) => {
+      if (status === 'SUBSCRIBED') {
+        console.info('[DASHBOARD] Realtime connected for device:', deviceId);
+      } else if (['CHANNEL_ERROR', 'TIMED_OUT', 'CLOSED'].includes(status)) {
+        console.warn('[DASHBOARD] Realtime status:', status, error?.message || 'No additional details');
+      }
+    });
 }
 
 function openReset() {
@@ -664,8 +795,15 @@ async function login(event) {
 async function logout() {
   if (liveChannel && supabaseClient) supabaseClient.removeChannel(liveChannel);
   liveChannel = null;
+  liveDeviceId = null;
+  claimAttemptedUserId = null;
   if (statusRefreshTimer) clearInterval(statusRefreshTimer);
   statusRefreshTimer = null;
+  state.device = null;
+  state.events = [];
+  state.locations = [];
+  state.latestLocation = null;
+  state.access = [];
   if (supabaseClient) await supabaseClient.auth.signOut();
   showLogin();
 }
@@ -957,7 +1095,6 @@ function bind() {
     const hidden = $('technicalDetails').classList.toggle('hidden');
     $('technicalToggle').textContent = hidden ? 'Show details' : 'Hide details';
   });
-  $('addAccessBtn').addEventListener('click', addAccess);
   $('profileBtn').addEventListener('click', event => {
     event.preventDefault();
     event.stopPropagation();

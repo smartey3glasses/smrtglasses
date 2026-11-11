@@ -1,4 +1,4 @@
-const CACHE_NAME = 'smart-eyeglasses-live-shell-v2';
+const CACHE_NAME = 'smart-eyeglasses-live-shell-v3';
 const APP_SHELL = [
   './',
   './index.html',
@@ -29,16 +29,32 @@ self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
 
   const url = new URL(event.request.url);
-
   if (url.origin !== self.location.origin) {
     event.respondWith(fetch(event.request).catch(() => caches.match(event.request)));
     return;
   }
 
+  const isLiveAppAsset = /\/(?:index\.html|app\.js|config\.js)$/.test(url.pathname) || url.pathname.endsWith('/');
+
+  if (isLiveAppAsset) {
+    event.respondWith(
+      fetch(new Request(event.request, { cache: 'no-store' })).then(response => {
+        if (response && response.ok) {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
+        }
+        return response;
+      }).catch(() => caches.match(event.request).then(cached => cached || caches.match('./index.html')))
+    );
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request).then(cached => cached || fetch(event.request).then(response => {
-      const copy = response.clone();
-      caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
+      if (response && response.ok) {
+        const copy = response.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
+      }
       return response;
     }).catch(() => caches.match('./index.html')))
   );
