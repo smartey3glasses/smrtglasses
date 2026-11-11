@@ -176,3 +176,12 @@ Live telemetry still requires an internet connection to reach Supabase.
 12. Deploy the frontend to Vercel.
 
 No Laravel, PHP, Node, Express, or separate VPS backend is required for this architecture.
+
+
+## Automatic device claiming and live status
+
+Run `SmartGlasses_AutoDevice_Setup.sql` in the Supabase SQL Editor. It adds a hardware heartbeat timestamp, lets the first authenticated account claim the oldest unassigned provisioned device, and adds the token-verified `device_heartbeat` RPC.
+
+Flash `SmartGlasses_AutoHeartbeat_Core3_12.ino` to the ESP32 for this test. It sends a heartbeat immediately after Wi-Fi connects and every 30 seconds thereafter. The dashboard marks the device Online when `last_seen_at` is within 90 seconds; GPS is not used to determine device connectivity.
+
+The first account to sign in while an unassigned provisioned device exists becomes its owner. Create/sign in with the intended primary caregiver account first. Once claimed, other accounts cannot claim that same device; use Family Access to share it.

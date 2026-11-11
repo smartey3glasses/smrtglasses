@@ -5,6 +5,7 @@ let supabaseClient = null;
 let deferredInstallPrompt = null;
 let liveChannel = null;
 let recoveryMode = /(?:^|[#&?])type=recovery(?:&|$)/.test(window.location.hash + window.location.search);
+let statusRefreshTimer = null;
 
 const state = {
   events: [],
@@ -214,9 +215,14 @@ function uiDistanceMeters(row) {
 }
 
 function effectiveStatus() {
-  const latest = recordTime(state.latestLocation);
-  if (!latest) return state.device?.status || 'offline';
-  return Date.now() - new Date(latest).getTime() <= 120000 ? 'online' : 'offline';
+  const lastSeen = state.device?.last_seen_at || state.device?.updated_at || null;
+  if (!lastSeen) return 'offline';
+  const age = Date.now() - new Date(lastSeen).getTime();
+  return Number.isFinite(age) && age <= 90000 ? 'online' : 'offline';
+}
+
+function latestDeviceUpdate() {
+  return state.device?.last_seen_at || state.device?.updated_at || null;
 }
 
 function currentDeviceName() {
@@ -236,6 +242,7 @@ function renderRecent() {
 function renderStats() {
   const location = state.latestLocation;
   const updated = recordTime(location);
+  const deviceUpdated = latestDeviceUpdate();
   const status = effectiveStatus();
 
   $('todayEvents').textContent = state.events.length;
@@ -246,8 +253,8 @@ function renderStats() {
   $('locationAvailability').textContent = location ? 'Available' : 'Waiting';
   $('locationMeta').textContent = location ? `Updated ${fmtAgo(updated)}` : 'No telemetry received';
   $('deviceStatus').textContent = status;
-  $('deviceStatusMeta').textContent = updated ? `Last update ${fmtAgo(updated)}` : 'No telemetry received';
-  $('relativeStatus').textContent = updated ? `${status} · updated ${fmtAgo(updated)}` : `${status} · no telemetry`;
+  $('deviceStatusMeta').textContent = deviceUpdated ? `Last device signal ${fmtAgo(deviceUpdated)}` : 'No heartbeat received';
+  $('relativeStatus').textContent = deviceUpdated ? `${status} · updated ${fmtAgo(deviceUpdated)}` : `${status} · no heartbeat`;
   $('locationTime').textContent = fmtDate(updated);
   $('locationUpdated').textContent = fmtAgo(updated);
   $('locationDevice').textContent = currentDeviceName();
@@ -291,7 +298,7 @@ function renderLocations() {
 
 function renderDevices() {
   const status = effectiveStatus();
-  const updated = recordTime(state.latestLocation);
+  const updated = latestDeviceUpdate();
   $('deviceCards').innerHTML = `<div class="device-card"><div class="device-top"><div><div class="device-id">${esc(currentDeviceName())}</div><div class="device-type">${updated ? `Last reported ${esc(fmtAgo(updated))}` : 'Waiting for telemetry'}</div></div><div class="device-status"><span class="status-dot"></span>${esc(status)}</div></div><div class="device-specs"><div><span>Location</span><b>${state.latestLocation ? 'Available' : 'Waiting'}</b></div><div><span>Obstacle alerts</span><b>${state.events.length ? 'Available' : 'None yet'}</b></div><div><span>Audio guidance</span><b>Device controlled</b></div><div><span>Update</span><b>${esc(fmtAgo(updated))}</b></div><div><span>Device ID</span><b>${esc(state.device?.id || 'Not assigned')}</b></div></div></div>`;
   $('technicalConnection').textContent = status;
 }
@@ -399,6 +406,10 @@ async function loadData() {
     $('profileEmail').textContent = user.email || '';
     $('userName').textContent = user.user_metadata?.name || user.email?.split('@')[0] || 'Caregiver';
 
+    const { data: claimedDeviceId, error: claimError } = await supabaseClient.rpc('claim_first_unassigned_device');
+    if (claimError) throw new Error(`Automatic device setup failed: ${claimError.message}`);
+    if (claimedDeviceId) console.info('[DASHBOARD] Automatically claimed device:', claimedDeviceId);
+
     const [ownedDevicesResult, accessRowsResult] = await Promise.all([
       supabaseClient
         .from('devices')
@@ -412,6 +423,7 @@ async function loadData() {
     ]);
 
     if (ownedDevicesResult.error) throw ownedDevicesResult.error;
+    if (accessRowsResult.error) throw new Error(`Unable to read device access: ${accessRowsResult.error.message}`);
 
     const accessibleDeviceIds = [...new Set((accessRowsResult.data || []).map(row => row.device_id).filter(Boolean))];
     let accessibleDevices = ownedDevicesResult.data || [];
@@ -437,7 +449,7 @@ async function loadData() {
       state.latestLocation = null;
       state.access = [];
       renderAll();
-      toast('No Smart Glasses device is assigned to this account yet.');
+      toast('No unassigned Smart Glasses device is available for this account.');
       return;
     }
 
@@ -476,6 +488,13 @@ async function loadData() {
     console.info('[DASHBOARD] Loaded locations:', state.locations.length);
 
     subscribeToDevice(device.id);
+    if (statusRefreshTimer) clearInterval(statusRefreshTimer);
+    statusRefreshTimer = setInterval(() => {
+      if (state.device) {
+        renderStats();
+        renderDevices();
+      }
+    }, 10000);
   } catch (error) {
     console.error(error);
     state.device = null;
@@ -645,6 +664,8 @@ async function login(event) {
 async function logout() {
   if (liveChannel && supabaseClient) supabaseClient.removeChannel(liveChannel);
   liveChannel = null;
+  if (statusRefreshTimer) clearInterval(statusRefreshTimer);
+  statusRefreshTimer = null;
   if (supabaseClient) await supabaseClient.auth.signOut();
   showLogin();
 }
