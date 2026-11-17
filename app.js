@@ -17,7 +17,9 @@ const state = {
   latestLocation: null,
   map: null,
   miniMap: null,
-  access: []
+  access: [],
+  eventCountTotal: null,
+  eventCountToday: null
 };
 
 const i18n = {
@@ -134,6 +136,34 @@ function recordTime(row) {
   return row?.timestamp || row?.created_at || null;
 }
 
+function localDayBounds(date = new Date()) {
+  const start = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const end = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
+  return { start: start.toISOString(), end: end.toISOString() };
+}
+
+function isToday(value) {
+  if (!value) return false;
+  const date = new Date(value);
+  return Number.isFinite(date.getTime()) && date.toDateString() === new Date().toDateString();
+}
+
+async function loadEventCounts(deviceId) {
+  const { start, end } = localDayBounds();
+  const [totalResult, todayResult] = await Promise.all([
+    supabaseClient.from('obstacle_events').select('id', { count: 'exact', head: true }).eq('device_id', deviceId),
+    supabaseClient.from('obstacle_events').select('id', { count: 'exact', head: true })
+      .eq('device_id', deviceId).gte('timestamp', start).lt('timestamp', end)
+  ]);
+
+  state.eventCountTotal = totalResult.error ? null : totalResult.count;
+  state.eventCountToday = todayResult.error ? null : todayResult.count;
+
+  if (totalResult.error || todayResult.error) {
+    console.warn('[DASHBOARD] Exact obstacle-event counts could not be loaded:', totalResult.error?.message || todayResult.error?.message);
+  }
+}
+
 function fmtAgo(iso) {
   if (!iso) return 'No update';
   const seconds = Math.max(0, Math.floor((Date.now() - new Date(iso)) / 1000));
@@ -209,12 +239,15 @@ function uiDirection(value) {
 }
 
 function uiSeverity(value) {
-  const severity = String(value || 'warning').toLowerCase();
-  return severity === 'danger' ? 'High' : 'Medium';
+  const severity = String(value || 'medium').toLowerCase();
+  if (['high', 'danger', 'critical'].includes(severity)) return 'High';
+  if (['low', 'safe'].includes(severity)) return 'Low';
+  return 'Medium';
 }
 
 function uiDistanceMeters(row) {
-  return row?.distance_cm != null ? Number(row.distance_cm) / 100 : 0;
+  if (row?.distance_cm == null || !Number.isFinite(Number(row.distance_cm))) return null;
+  return Number(row.distance_cm) / 100;
 }
 
 function latestDeviceUpdate() {
@@ -256,7 +289,7 @@ function renderRecent() {
     const direction = uiDirection(event.direction);
     const severity = uiSeverity(event.severity);
     const distance = uiDistanceMeters(event);
-    return `<div class="event-item"><div class="event-icon"><iconify-icon icon="solar:danger-triangle-linear"></iconify-icon></div><div><b>${esc(direction === 'Center' ? 'Obstacle ahead' : `Obstacle on the ${direction.toLowerCase()}`)}</b><span>${distance.toFixed(1)} m · ${esc(fmtAgo(recordTime(event)))}</span></div><small class="severity ${severityClass(severity)}">${severity === 'High' ? 'More urgent' : 'Moderate'}</small></div>`;
+    return `<div class="event-item"><div class="event-icon"><iconify-icon icon="solar:danger-triangle-linear"></iconify-icon></div><div><b>${esc(direction === 'Center' ? 'Obstacle ahead' : `Obstacle on the ${direction.toLowerCase()}`)}</b><span>${distance == null ? 'Distance unavailable' : `${distance.toFixed(1)} m`} · ${esc(fmtAgo(recordTime(event)))}</span></div><small class="severity ${severityClass(severity)}">${severity === 'High' ? 'More urgent' : severity === 'Low' ? 'Less urgent' : 'Moderate'}</small></div>`;
   }).join('') || '<div class="empty">No alerts recorded.</div>';
 }
 
@@ -266,9 +299,12 @@ function renderStats() {
   const deviceUpdated = latestDeviceUpdate();
   const status = effectiveStatus();
 
-  $('todayEvents').textContent = state.events.length;
-  $('alertsTotal').textContent = state.events.length;
-  $('eventTrend').textContent = state.events[0] ? `Latest alert ${fmtAgo(recordTime(state.events[0]))}` : 'No alerts recorded';
+  const todayCount = state.eventCountToday == null ? '—' : state.eventCountToday;
+  const totalCount = state.eventCountTotal == null ? '—' : state.eventCountTotal;
+  $('todayEvents').textContent = todayCount;
+  if ($('alertsTodayCount')) $('alertsTodayCount').textContent = todayCount;
+  $('alertsTotal').textContent = totalCount;
+  $('eventTrend').textContent = state.events[0] ? `Latest detection ${fmtAgo(recordTime(state.events[0]))}` : 'No detections recorded';
   $('latestAlertText').textContent = state.events[0] ? fmtAgo(recordTime(state.events[0])) : 'None';
   $('miniLocationTime').textContent = fmtAgo(updated);
   $('locationAvailability').textContent = location ? 'Available' : 'Waiting';
@@ -309,7 +345,7 @@ function renderEvents() {
     const direction = uiDirection(event.direction);
     const severity = uiSeverity(event.severity);
     const distance = uiDistanceMeters(event);
-    return `<tr><td>${esc(fmtDate(recordTime(event)))}</td><td><b>${esc(direction === 'Center' ? 'Obstacle ahead' : `Obstacle on the ${direction.toLowerCase()}`)}</b></td><td>${distance.toFixed(1)} m</td><td><span class="severity ${severityClass(severity)}">${severity === 'High' ? 'More urgent' : 'Moderate'}</span></td><td>${esc(event.voice_command || 'Obstacle detected')}</td></tr>`;
+    return `<tr><td>${esc(fmtDate(recordTime(event)))}</td><td><b>${esc(direction === 'Center' ? 'Obstacle ahead' : `Obstacle on the ${direction.toLowerCase()}`)}</b></td><td>${distance == null ? '—' : `${distance.toFixed(1)} m`}</td><td><span class="severity ${severityClass(severity)}">${severity === 'High' ? 'More urgent' : severity === 'Low' ? 'Less urgent' : 'Moderate'}</span></td><td>${esc(event.voice_command || 'Obstacle detected')}</td></tr>`;
   }).join('') || '<tr><td colspan="5">No alerts recorded.</td></tr>'}</tbody></table>`;
 }
 
@@ -538,6 +574,8 @@ async function loadData(options = {}) {
       state.device = null;
       state.locations = [];
       state.events = [];
+      state.eventCountTotal = 0;
+      state.eventCountToday = 0;
       state.latestLocation = null;
       state.access = [];
       if (liveChannel) supabaseClient.removeChannel(liveChannel);
@@ -586,6 +624,8 @@ async function loadData(options = {}) {
       state.events = eventsResult.data || [];
     }
 
+    await loadEventCounts(device.id);
+
     state.latestLocation = state.locations[0] || null;
     const locationById = Object.fromEntries(state.locations.map(location => [location.id, location]));
     state.events = state.events.map(event => {
@@ -616,6 +656,8 @@ async function loadData(options = {}) {
     if (!state.device) {
       state.locations = [];
       state.events = [];
+      state.eventCountTotal = null;
+      state.eventCountToday = null;
       state.latestLocation = null;
       state.access = [];
     }
@@ -647,9 +689,14 @@ function subscribeToDevice(deviceId) {
       table: 'obstacle_events',
       filter: `device_id=eq.${deviceId}`
     }, payload => {
+      const alreadyKnown = state.events.some(event => event.id === payload.new.id);
       state.events = upsertNewestRecord(state.events, payload.new, 100);
+      if (!alreadyKnown) {
+        if (state.eventCountTotal != null) state.eventCountTotal += 1;
+        if (isToday(recordTime(payload.new)) && state.eventCountToday != null) state.eventCountToday += 1;
+      }
       renderAll();
-      toast('New obstacle alert received.');
+      toast('New obstacle detection received.');
     })
     .on('postgres_changes', {
       event: 'INSERT',
@@ -801,6 +848,8 @@ async function logout() {
   statusRefreshTimer = null;
   state.device = null;
   state.events = [];
+  state.eventCountTotal = null;
+  state.eventCountToday = null;
   state.locations = [];
   state.latestLocation = null;
   state.access = [];

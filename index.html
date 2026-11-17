@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
   <script src="https://code.iconify.design/iconify-icon/3.0.3/iconify-icon.min.js"></script>
   <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="design-refresh.css" />
   <link rel="manifest" href="manifest.webmanifest" />
   <meta name="theme-color" content="#16352c" />
   <meta name="mobile-web-app-capable" content="yes" />
@@ -74,9 +75,9 @@
   <section id="loginView" class="login-view">
     <div class="login-panel">
       <div class="brand-mark logo-mark"><img src="smart-glasses-logo.svg" alt="Smart Eyeglasses" /></div>
-      <div class="eyebrow">CAREGIVER MONITORING</div>
+      <div class="eyebrow">Caregiver access</div>
       <h1>Smart Eyeglasses<br><span>Dashboard</span></h1>
-      <p class="login-copy">A simple way to check your relative's location, connection, and recent obstacle alerts.</p>
+      <p class="login-copy">Check the glasses’ location, connection and recent obstacle detections.</p>
       <form id="loginForm" class="login-form">
         <label>Email<input id="emailInput" type="email" placeholder="Enter your email" required /></label>
         <label>Password
@@ -103,14 +104,14 @@
   <div id="appView" class="app-shell hidden">
     <aside class="sidebar">
       <div class="sidebar-brand"><div class="brand-mark small logo-mark"><img src="smart-glasses-logo.svg" alt="Smart Eyeglasses" /></div><div><b>Smart Eyeglasses</b><span>Care Dashboard</span></div></div>
-      <div class="workspace-label">MONITOR</div>
+      <div class="workspace-label">Monitor</div>
       <nav>
         <button class="nav-item active" data-section="overview"><span><iconify-icon icon="solar:home-2-linear"></iconify-icon></span> Home</button>
         <button class="nav-item" data-section="location"><span><iconify-icon icon="solar:map-point-linear"></iconify-icon></span> Location</button>
         <button class="nav-item" data-section="events"><span><iconify-icon icon="solar:danger-triangle-linear"></iconify-icon></span> Alerts</button>
         <button class="nav-item" data-section="devices"><span><iconify-icon icon="solar:glasses-linear"></iconify-icon></span> Smart Glasses</button>
       </nav>
-      <div class="workspace-label secondary-label">ACCOUNT</div>
+      <div class="workspace-label secondary-label">Account</div>
       <nav>
         <button class="nav-item" data-section="access"><span><iconify-icon icon="solar:users-group-rounded-linear"></iconify-icon></span> Family Access</button>
       </nav>
@@ -128,7 +129,7 @@
 
       <section id="overview" class="page-section active-section">
         <div class="hero-row caregiver-hero">
-          <div><p class="muted">Good afternoon</p><h3><span id="userName">Caregiver</span>, here's how things look.</h3><p class="hero-copy">Check your relative's connection, current location, and recent alerts in one place.</p></div>
+          <div><p class="muted">Good afternoon</p><h3><span id="userName">Caregiver</span>, here's how things look.</h3><p class="hero-copy">The latest location, connection status and obstacle activity.</p></div>
           <div class="person-status"><span class="status-dot"></span><div><b id="relativeName">Smart Glasses</b><small id="relativeStatus">offline · no telemetry</small></div></div>
         </div>
 
@@ -145,27 +146,27 @@
       </section>
 
       <section id="location" class="page-section">
-        <div class="section-heading"><div><span class="panel-kicker">CURRENT LOCATION</span><h3>Where are they?</h3><p>See the latest location reported by the Smart Eyeglasses.</p></div><span class="chip green-chip">Location available</span></div>
+        <div class="section-heading"><div><span class="panel-kicker">CURRENT LOCATION</span><h3>Where are they?</h3><p>Latest location reported by the glasses.</p></div><span class="chip green-chip">Location available</span></div>
         <div class="location-grid"><div class="panel map-panel"><div id="mainMap" class="main-map"></div></div><div class="panel location-detail"><span class="panel-kicker">LATEST UPDATE</span><h4 id="locationTime">No update</h4><div class="location-friendly"><iconify-icon icon="solar:map-point-wave-linear"></iconify-icon><div><strong>Current location is available</strong><span id="locationSummary">The glasses recently reported a position.</span></div></div><div class="detail-list"><div><span>Last update</span><b id="locationUpdated">Just now</b></div><div><span>Device</span><b id="locationDevice">Smart Glasses</b></div></div><button id="openMapsBtn" class="primary-btn full">Open in Google Maps ↗</button><button id="showCoordinatesBtn" class="link-btn">Show exact coordinates</button><div id="coordinatesBox" class="coordinates-box hidden"><span>Latitude</span><b id="detailLat">No location</b><span>Longitude</span><b id="detailLng">No location</b></div></div></div>
         <div class="panel history-panel"><div class="panel-head"><div><span class="panel-kicker">RECENT MOVEMENT</span><h4>Location history</h4></div></div><div id="locationHistory" class="table-wrap"></div></div>
       </section>
 
       <section id="events" class="page-section">
-        <div class="section-heading"><div><span class="panel-kicker">RECENT ALERTS</span><h3>Obstacle alerts</h3><p>See when the glasses detected an obstacle while your relative was walking.</p></div></div>
-        <div class="alert-summary"><div><span>Alerts today</span><strong id="alertsTotal">4</strong></div><div><span>Latest alert</span><strong id="latestAlertText">2 min ago</strong></div></div>
+        <div class="section-heading"><div><span class="panel-kicker">RECENT ALERTS</span><h3>Obstacle alerts</h3><p>Review detected obstacles, distance and time.</p></div></div>
+        <div class="alert-summary"><div><span>Detections today</span><strong id="alertsTodayCount">—</strong></div><div><span>All-time detections</span><strong id="alertsTotal">—</strong></div><div><span>Latest detection</span><strong id="latestAlertText">None</strong></div></div>
         <div class="filter-row"><input id="eventSearch" class="search-input" placeholder="Search alerts…" /><div class="custom-select" id="severityPicker"><button class="custom-select-trigger" id="severityPickerTrigger" type="button" aria-haspopup="listbox" aria-expanded="false"><span id="severityPickerLabel">All alerts</span><iconify-icon icon="solar:alt-arrow-down-linear"></iconify-icon></button><div class="custom-select-menu" id="severityPickerMenu" role="listbox" aria-label="Alert severity"><button type="button" class="custom-option active" data-value="all" role="option" aria-selected="true"><span>All alerts</span><iconify-icon icon="solar:check-circle-linear"></iconify-icon></button><button type="button" class="custom-option" data-value="High" role="option" aria-selected="false"><span>More urgent</span><iconify-icon icon="solar:check-circle-linear"></iconify-icon></button><button type="button" class="custom-option" data-value="Medium" role="option" aria-selected="false"><span>Moderate</span><iconify-icon icon="solar:check-circle-linear"></iconify-icon></button><button type="button" class="custom-option" data-value="Low" role="option" aria-selected="false"><span>Less urgent</span><iconify-icon icon="solar:check-circle-linear"></iconify-icon></button></div><input type="hidden" id="severityFilter" value="all" /></div><button id="clearFilterBtn" class="secondary-btn">Reset</button></div>
         <div class="panel table-panel"><div id="eventsTable" class="table-wrap"></div></div>
-        <p class="plain-note"><iconify-icon icon="solar:info-circle-linear"></iconify-icon> Alerts show what the glasses detected.</p>
+        <p class="plain-note"><iconify-icon icon="solar:info-circle-linear"></iconify-icon> Counts are queried from the database. The table displays the latest 100 detection records; use the filters to narrow this list.</p>
       </section>
 
       <section id="devices" class="page-section">
-        <div class="section-heading"><div><span class="panel-kicker">SMART GLASSES</span><h3>How are the glasses doing?</h3><p>A status view of the device. Technical details are available below for reference.</p></div></div>
+        <div class="section-heading"><div><span class="panel-kicker">SMART GLASSES</span><h3>How are the glasses doing?</h3><p>Check device connectivity and technical details.</p></div></div>
         <div id="deviceCards" class="device-grid"></div>
         <div class="panel technical-panel"><div class="panel-head"><div><span class="panel-kicker">DEVICE DETAILS</span><h4>Technical information</h4></div><button id="technicalToggle" class="text-btn">Hide details</button></div><div id="technicalDetails" class="technical-details"><div><span>Controller</span><b>ESP32 DevKit V1</b></div><div><span>Obstacle sensors</span><b>VL53L0X obstacle sensors</b></div><div><span>Location</span><b>NEO-6M GPS</b></div><div><span>Audio</span><b>VV4 bone-conduction headset</b></div><div><span>Connection</span><b id="technicalConnection">Connected</b></div></div></div>
       </section>
 
       <section id="access" class="page-section">
-        <div class="section-heading"><div><span class="panel-kicker">FAMILY ACCESS</span><h3>Who can view this?</h3><p>Manage the family members or caregivers who can see the location and alerts.</p></div><button class="primary-btn compact" id="addAccessBtn"><iconify-icon icon="solar:user-plus-linear"></iconify-icon> Add family member</button></div>
+        <div class="section-heading"><div><span class="panel-kicker">FAMILY ACCESS</span><h3>Who can view this?</h3><p>Choose who can view the device location and alerts.</p></div><button class="primary-btn compact" id="addAccessBtn"><iconify-icon icon="solar:user-plus-linear"></iconify-icon> Add family member</button></div>
         <div class="panel"><div class="access-summary"><div><span>People with access</span><strong id="accessCount">0</strong></div><div><span>What they can see</span><strong>Location & alerts</strong></div><div><span>Device</span><strong id="accessDeviceName">Smart Glasses</strong></div></div><div id="accessTable" class="table-wrap"></div></div>
       </section>
     </main>
