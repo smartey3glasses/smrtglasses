@@ -295,3 +295,12 @@ input:focus { outline: 3px solid var(--sky); outline-offset: 0; }
   .toast { bottom: 92px; }
   .profile-menu { top: 68px; right: 16px; }
 }
+
+/* alerts footer, refresh state */
+.load-more { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px 4px 0; color: var(--muted); font-size: 14px; }
+.load-more .secondary-btn { min-height: 42px; }
+.icon-btn:disabled { cursor: progress; }
+.icon-btn.spinning iconify-icon { animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.filter-row .custom-select-trigger { min-width: 170px; }
+.nav-item { line-height: 1.15; }

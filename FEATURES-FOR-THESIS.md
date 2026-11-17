@@ -25,7 +25,7 @@ Uses the NEO-6M GPS module to obtain the wearable device's geographic coordinate
 Stores obstacle detection records in the database and displays them in the Alerts section. Each record may show its timestamp, reported direction, distance, severity, and voice command. Caregivers can search the records and filter them by severity.
 
 ### 7. Detection Statistics
-Displays the number of recorded obstacle-event rows for the current local day and the all-time total for the selected device. Counts are retrieved using exact database counts rather than the number of records currently loaded into the browser. The history table is limited to the latest 100 records in this version.
+Displays the number of recorded obstacle-event rows for the current local day and the all-time total for the selected device. Counts are retrieved using exact database counts rather than the number of records currently loaded into the browser. The alerts table loads 20 records at a time from the database with a "Show more" button, and can be filtered by search text, urgency, and date range (24 hours, 7, 30, or 90 days).
 
 ### 8. Device Status and Connection Monitoring
 Displays whether the Smart Eyeglasses are online or offline based on the latest device heartbeat or telemetry timestamp, along with the most recent update and device information.

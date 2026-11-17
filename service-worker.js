@@ -1,4 +1,4 @@
-const CACHE_NAME = 'smart-eyeglasses-live-shell-v4';
+const CACHE_NAME = 'smart-eyeglasses-live-shell-v5';
 const APP_SHELL = [
   './',
   './index.html',
@@ -30,7 +30,7 @@ self.addEventListener('fetch', event => {
 
   const url = new URL(event.request.url);
   if (url.origin !== self.location.origin) {
-    event.respondWith(fetch(event.request).catch(() => caches.match(event.request)));
+    event.respondWith(fetch(event.request).catch(() => caches.match(event.request).then(hit => hit || Response.error())));
     return;
   }
 

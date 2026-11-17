@@ -9,6 +9,8 @@ let statusRefreshTimer = null;
 let liveDeviceId = null;
 let claimAttemptedUserId = null;
 let isLoadingData = false;
+let loadFailed = false;
+let alertSearchTimer = null;
 
 const state = {
   events: [],
@@ -337,22 +339,111 @@ function renderStats() {
   }
 }
 
-function renderEvents() {
-  const query = ($('eventSearch').value || '').toLowerCase();
-  const severityFilter = $('severityFilter').value;
-  const rows = state.events.filter(event => {
-    const severity = uiSeverity(event.severity);
-    const matchesSeverity = severityFilter === 'all' || severity === severityFilter;
-    const searchable = [uiDirection(event.direction), event.voice_command || '', severity].join(' ').toLowerCase();
-    return matchesSeverity && searchable.includes(query);
-  });
+const ALERT_PAGE = 20;
+const alertView = { items: [], total: 0, loading: false, failed: false, requestId: 0 };
 
-  $('eventsTable').innerHTML = `<table class="data-table"><thead><tr><th>When</th><th>Alert</th><th>Distance</th><th>Urgency</th><th>Voice guidance</th></tr></thead><tbody>${rows.map(event => {
-    const direction = uiDirection(event.direction);
-    const severity = uiSeverity(event.severity);
-    const distance = uiDistanceMeters(event);
-    return `<tr><td>${esc(fmtDate(recordTime(event)))}</td><td><span class="alert-cell">${dirGlyph(direction)}<b>${esc(direction === 'Center' ? 'Obstacle ahead' : `Obstacle on the ${direction.toLowerCase()}`)}</b></span></td><td>${distance == null ? '—' : `${distance.toFixed(1)} m`}</td><td><span class="severity ${severityClass(severity)}">${severity === 'High' ? 'More urgent' : severity === 'Low' ? 'Less urgent' : 'Moderate'}</span></td><td>${esc(event.voice_command || 'Obstacle detected')}</td></tr>`;
-  }).join('') || '<tr><td colspan="5">No alerts recorded.</td></tr>'}</tbody></table>`;
+function alertFilters() {
+  return {
+    query: ($('eventSearch').value || '').trim(),
+    severity: $('severityFilter').value,
+    days: $('rangeFilter').value
+  };
+}
+
+function hasActiveFilters() {
+  const f = alertFilters();
+  return Boolean(f.query) || f.severity !== 'all' || f.days !== 'all';
+}
+
+async function loadAlerts({ more = false, keep = false } = {}) {
+  if (!supabaseClient || !state.device) {
+    alertView.items = [];
+    alertView.total = 0;
+    renderEvents();
+    return;
+  }
+
+  const requestId = ++alertView.requestId;
+  const f = alertFilters();
+  const offset = more ? alertView.items.length : 0;
+  const size = more || !keep ? ALERT_PAGE : Math.max(ALERT_PAGE, alertView.items.length);
+
+  alertView.loading = true;
+  alertView.failed = false;
+  renderEvents();
+
+  let query = supabaseClient
+    .from('obstacle_events')
+    .select('*', { count: 'exact' })
+    .eq('device_id', state.device.id);
+
+  if (f.days !== 'all') {
+    query = query.gte('timestamp', new Date(Date.now() - Number(f.days) * 86400000).toISOString());
+  }
+  if (f.severity === 'High') query = query.or('severity.ilike.high,severity.ilike.danger,severity.ilike.critical');
+  if (f.severity === 'Low') query = query.or('severity.ilike.low,severity.ilike.safe');
+  if (f.severity === 'Medium') {
+    query = query.or('severity.is.null,severity.not.in.(high,danger,critical,low,safe,High,Danger,Critical,Low,Safe)');
+  }
+  const term = f.query.replace(/[%,()*\\]/g, ' ').trim();
+  if (term) query = query.or(`voice_command.ilike.%${term}%,direction.ilike.%${term}%`);
+
+  const { data, error, count } = await query
+    .order('timestamp', { ascending: false })
+    .range(offset, offset + size - 1);
+
+  if (requestId !== alertView.requestId) return; // a newer request replaced this one
+
+  alertView.loading = false;
+  if (error) {
+    console.error('[DASHBOARD] Alerts could not be loaded:', error.message);
+    alertView.failed = true;
+    loadFailed = true;
+    toast('Alerts could not be loaded. Please try again.');
+  } else {
+    const rows = data || [];
+    const known = new Set(more ? alertView.items.map(item => item.id) : []);
+    alertView.items = more ? alertView.items.concat(rows.filter(row => !known.has(row.id))) : rows;
+    alertView.total = count ?? alertView.items.length;
+  }
+  renderEvents();
+}
+
+function renderEvents() {
+  const rows = alertView.items;
+  const filtered = hasActiveFilters();
+  let body;
+
+  if (!rows.length) {
+    const message = alertView.loading
+      ? 'Loading alerts...'
+      : alertView.failed
+        ? 'Alerts could not be loaded.'
+        : filtered
+          ? 'No alerts match these filters.'
+          : 'No obstacle alerts have been recorded yet.';
+    body = `<tr><td colspan="5" class="empty">${esc(message)}</td></tr>`;
+  } else {
+    body = rows.map(row => {
+      const severity = uiSeverity(row.severity);
+      const direction = uiDirection(row.direction);
+      const distance = uiDistanceMeters(row);
+      const label = direction === 'Center' ? 'Obstacle ahead' : `Obstacle on the ${direction.toLowerCase()}`;
+      return `<tr>
+        <td>${esc(fmtDate(recordTime(row)))}</td>
+        <td><span class="alert-cell">${dirGlyph(direction)}<b>${esc(label)}</b></span></td>
+        <td>${distance == null ? 'Not available' : `${distance.toFixed(1)} m`}</td>
+        <td><span class="severity ${severityClass(severity)}">${esc(severity)}</span></td>
+        <td>${esc(row.voice_command || 'Not available')}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  $('eventsTable').innerHTML = `<table class="data-table"><thead><tr><th>When</th><th>Alert</th><th>Distance</th><th>Urgency</th><th>Voice guidance</th></tr></thead><tbody>${body}</tbody></table>`;
+  $('alertsShown').textContent = rows.length ? `Showing ${rows.length} of ${alertView.total}` : '';
+  $('loadMoreBtn').classList.toggle('hidden', !rows.length || rows.length >= alertView.total);
+  $('loadMoreBtn').disabled = alertView.loading;
+  $('loadMoreBtn').textContent = alertView.loading ? 'Loading...' : 'Show more';
 }
 
 function renderLocations() {
@@ -458,6 +549,7 @@ async function loadData(options = {}) {
   const quiet = options.quiet === true;
   const attemptClaim = options.attemptClaim !== false;
   isLoadingData = true;
+  loadFailed = false;
 
   try {
     const { data: userData, error: userError } = await supabaseClient.auth.getUser();
@@ -624,6 +716,7 @@ async function loadData(options = {}) {
     }
 
     if (eventsResult.error) {
+      loadFailed = true;
       console.error('[DASHBOARD] Obstacle events could not be loaded:', eventsResult.error.message);
       if (!quiet) toast(`Obstacle events could not be loaded: ${eventsResult.error.message}`);
     } else {
@@ -631,6 +724,7 @@ async function loadData(options = {}) {
     }
 
     await loadEventCounts(device.id);
+    await loadAlerts({ keep: true });
 
     state.latestLocation = state.locations[0] || null;
     const locationById = Object.fromEntries(state.locations.map(location => [location.id, location]));
@@ -657,6 +751,7 @@ async function loadData(options = {}) {
       if (state.device) loadData({ quiet: true, attemptClaim: false });
     }, 30000);
   } catch (error) {
+    loadFailed = true;
     console.error('[DASHBOARD] Data loading failed:', error);
     if (!quiet) toast(error.message || 'Unable to load live data.');
     if (!state.device) {
@@ -702,6 +797,7 @@ function subscribeToDevice(deviceId) {
         if (isToday(recordTime(payload.new)) && state.eventCountToday != null) state.eventCountToday += 1;
       }
       renderAll();
+      loadAlerts({ keep: true });
       toast('New obstacle detection received.');
     })
     .on('postgres_changes', {
@@ -859,6 +955,9 @@ async function logout() {
   state.locations = [];
   state.latestLocation = null;
   state.access = [];
+  alertView.items = [];
+  alertView.total = 0;
+  alertView.requestId += 1;
   if (supabaseClient) await supabaseClient.auth.signOut();
   showLogin();
 }
@@ -904,7 +1003,7 @@ async function addAccess() {
   toast('Access granted.');
 }
 
-function setSeverity(value) {
+function setSeverity(value, silent = false) {
   const option = document.querySelector(`#severityPickerMenu .custom-option[data-value="${value}"]`);
   if (!option) return;
   $('severityFilter').value = value;
@@ -915,10 +1014,73 @@ function setSeverity(value) {
     item.setAttribute('aria-selected', active ? 'true' : 'false');
   });
   closeSeverityPicker();
-  renderEvents();
+  if (!silent) loadAlerts();
+}
+
+function setRange(value, silent = false) {
+  const option = document.querySelector(`#rangePickerMenu .custom-option[data-value="${value}"]`);
+  if (!option) return;
+  $('rangeFilter').value = value;
+  $('rangePickerLabel').textContent = option.querySelector('span').textContent;
+  document.querySelectorAll('#rangePickerMenu .custom-option').forEach(item => {
+    const active = item.dataset.value === value;
+    item.classList.toggle('active', active);
+    item.setAttribute('aria-selected', active ? 'true' : 'false');
+  });
+  closeRangePicker();
+  if (!silent) loadAlerts();
+}
+
+function openRangePicker() {
+  closeSeverityPicker();
+  $('rangePicker').classList.add('open');
+  $('rangePickerTrigger').setAttribute('aria-expanded', 'true');
+}
+
+function closeRangePicker() {
+  $('rangePicker').classList.remove('open');
+  $('rangePickerTrigger').setAttribute('aria-expanded', 'false');
+}
+
+function openResetFilters() {
+  if (!hasActiveFilters()) {
+    toast('Filters are already cleared.');
+    return;
+  }
+  $('resetFiltersModal').classList.remove('hidden');
+  $('cancelResetFilters').focus();
+}
+
+function closeResetFilters() {
+  $('resetFiltersModal').classList.add('hidden');
+}
+
+function confirmResetFilters() {
+  $('eventSearch').value = '';
+  setSeverity('all', true);
+  setRange('all', true);
+  closeResetFilters();
+  loadAlerts();
+  toast('Filters were reset.');
+}
+
+async function refreshAll() {
+  if (isLoadingData) {
+    toast('Already refreshing. One moment.');
+    return;
+  }
+  const button = $('refreshBtn');
+  button.disabled = true;
+  button.classList.add('spinning');
+  await loadData();
+  button.disabled = false;
+  button.classList.remove('spinning');
+  if ($('appView').classList.contains('hidden')) return; // session ended during refresh
+  toast(loadFailed ? 'Could not refresh. Check your connection and try again.' : 'Information refreshed.');
 }
 
 function openSeverityPicker() {
+  closeRangePicker();
   $('severityPicker').classList.add('open');
   $('severityPickerTrigger').setAttribute('aria-expanded', 'true');
 }
@@ -1082,18 +1244,39 @@ function bind() {
   $('resetModal').addEventListener('click', event => {
     if (event.target === $('resetModal')) closeReset();
   });
-  $('logoutBtn').addEventListener('click', logout);
-  $('refreshBtn').addEventListener('click', async () => {
-    await loadData();
-    toast('Information refreshed.');
-  });
+  $('logoutBtn').addEventListener('click', openLogout);
+  $('refreshBtn').addEventListener('click', refreshAll);
   document.querySelectorAll('.nav-item').forEach(button => {
     button.addEventListener('click', () => go(button.dataset.section));
   });
   document.querySelectorAll('[data-section-jump]').forEach(button => {
     button.addEventListener('click', () => go(button.dataset.sectionJump));
   });
-  $('eventSearch').addEventListener('input', renderEvents);
+  $('eventSearch').addEventListener('input', () => {
+    clearTimeout(alertSearchTimer);
+    alertSearchTimer = setTimeout(() => loadAlerts(), 350);
+  });
+  $('loadMoreBtn').addEventListener('click', () => loadAlerts({ more: true }));
+  $('rangePickerTrigger').addEventListener('click', () => {
+    $('rangePicker').classList.contains('open') ? closeRangePicker() : openRangePicker();
+  });
+  document.querySelectorAll('#rangePickerMenu .custom-option').forEach(option => {
+    option.addEventListener('click', () => setRange(option.dataset.value));
+  });
+  document.addEventListener('click', event => {
+    if (!$('rangePicker').contains(event.target)) closeRangePicker();
+  });
+  $('cancelResetFilters').addEventListener('click', closeResetFilters);
+  $('confirmResetFilters').addEventListener('click', confirmResetFilters);
+  $('resetFiltersModal').addEventListener('click', event => {
+    if (event.target === $('resetFiltersModal')) closeResetFilters();
+  });
+  document.addEventListener('keydown', event => {
+    if (event.key !== 'Escape') return;
+    closeResetFilters();
+    closeLogout();
+    closeRangePicker();
+  });
   $('severityPickerTrigger').addEventListener('click', () => {
     $('severityPicker').classList.contains('open') ? closeSeverityPicker() : openSeverityPicker();
   });
@@ -1109,10 +1292,7 @@ function bind() {
       openSeverityPicker();
     }
   });
-  $('clearFilterBtn').addEventListener('click', () => {
-    $('eventSearch').value = '';
-    setSeverity('all');
-  });
+  $('clearFilterBtn').addEventListener('click', openResetFilters);
   $('addAccessBtn').addEventListener('click', openFamilyAccess);
   $('closeFamilyAccess').addEventListener('click', closeFamilyAccess);
   $('cancelFamilyAccess').addEventListener('click', closeFamilyAccess);
