@@ -283,13 +283,18 @@ function currentDeviceName() {
   return state.device?.device_name || 'Smart Glasses';
 }
 
+function dirGlyph(direction) {
+  const on = key => (direction === key || direction === 'Multiple' ? ' class="on"' : '');
+  return `<svg class="dir" viewBox="0 0 40 40" aria-hidden="true"><path${on('Left')} d="M0.6 23.7A22 22 0 0 1 11.8 13.6"/><path${on('Center')} d="M13.9 12.9A22 22 0 0 1 26.1 12.9"/><path${on('Right')} d="M28.3 13.6A22 22 0 0 1 39.4 23.7"/><circle cx="20" cy="34" r="2.5"/></svg>`;
+}
+
 function renderRecent() {
   const list = state.events.slice(0, 5);
   $('recentEvents').innerHTML = list.map(event => {
     const direction = uiDirection(event.direction);
     const severity = uiSeverity(event.severity);
     const distance = uiDistanceMeters(event);
-    return `<div class="event-item"><div class="event-icon"><iconify-icon icon="solar:danger-triangle-linear"></iconify-icon></div><div><b>${esc(direction === 'Center' ? 'Obstacle ahead' : `Obstacle on the ${direction.toLowerCase()}`)}</b><span>${distance == null ? 'Distance unavailable' : `${distance.toFixed(1)} m`} · ${esc(fmtAgo(recordTime(event)))}</span></div><small class="severity ${severityClass(severity)}">${severity === 'High' ? 'More urgent' : severity === 'Low' ? 'Less urgent' : 'Moderate'}</small></div>`;
+    return `<div class="event-item">${dirGlyph(direction)}<div><b>${esc(direction === 'Center' ? 'Obstacle ahead' : `Obstacle on the ${direction.toLowerCase()}`)}</b><span>${distance == null ? 'Distance unavailable' : `${distance.toFixed(1)} m`} · ${esc(fmtAgo(recordTime(event)))}</span></div><small class="severity ${severityClass(severity)}">${severity === 'High' ? 'More urgent' : severity === 'Low' ? 'Less urgent' : 'Moderate'}</small></div>`;
   }).join('') || '<div class="empty">No alerts recorded.</div>';
 }
 
@@ -309,6 +314,7 @@ function renderStats() {
   $('miniLocationTime').textContent = fmtAgo(updated);
   $('locationAvailability').textContent = location ? 'Available' : 'Waiting';
   $('locationMeta').textContent = location ? `Updated ${fmtAgo(updated)}` : 'No telemetry received';
+  document.documentElement.dataset.device = status;
   $('deviceStatus').textContent = status;
   $('deviceStatusMeta').textContent = deviceUpdated ? `Last telemetry ${fmtAgo(deviceUpdated)}` : 'No device telemetry received';
   $('relativeStatus').textContent = deviceUpdated ? `${status} · telemetry ${fmtAgo(deviceUpdated)}` : `${status} · waiting for telemetry`;
@@ -341,16 +347,16 @@ function renderEvents() {
     return matchesSeverity && searchable.includes(query);
   });
 
-  $('eventsTable').innerHTML = `<table class="data-table"><thead><tr><th>WHEN</th><th>ALERT</th><th>DISTANCE</th><th>URGENCY</th><th>VOICE GUIDANCE</th></tr></thead><tbody>${rows.map(event => {
+  $('eventsTable').innerHTML = `<table class="data-table"><thead><tr><th>When</th><th>Alert</th><th>Distance</th><th>Urgency</th><th>Voice guidance</th></tr></thead><tbody>${rows.map(event => {
     const direction = uiDirection(event.direction);
     const severity = uiSeverity(event.severity);
     const distance = uiDistanceMeters(event);
-    return `<tr><td>${esc(fmtDate(recordTime(event)))}</td><td><b>${esc(direction === 'Center' ? 'Obstacle ahead' : `Obstacle on the ${direction.toLowerCase()}`)}</b></td><td>${distance == null ? '—' : `${distance.toFixed(1)} m`}</td><td><span class="severity ${severityClass(severity)}">${severity === 'High' ? 'More urgent' : severity === 'Low' ? 'Less urgent' : 'Moderate'}</span></td><td>${esc(event.voice_command || 'Obstacle detected')}</td></tr>`;
+    return `<tr><td>${esc(fmtDate(recordTime(event)))}</td><td><span class="alert-cell">${dirGlyph(direction)}<b>${esc(direction === 'Center' ? 'Obstacle ahead' : `Obstacle on the ${direction.toLowerCase()}`)}</b></span></td><td>${distance == null ? '—' : `${distance.toFixed(1)} m`}</td><td><span class="severity ${severityClass(severity)}">${severity === 'High' ? 'More urgent' : severity === 'Low' ? 'Less urgent' : 'Moderate'}</span></td><td>${esc(event.voice_command || 'Obstacle detected')}</td></tr>`;
   }).join('') || '<tr><td colspan="5">No alerts recorded.</td></tr>'}</tbody></table>`;
 }
 
 function renderLocations() {
-  $('locationHistory').innerHTML = `<table class="data-table"><thead><tr><th>WHEN</th><th>LOCATION</th></tr></thead><tbody>${state.locations.slice(0, 10).map(location => `<tr><td>${esc(fmtDate(recordTime(location)))}</td><td>${Number(location.latitude).toFixed(5)}, ${Number(location.longitude).toFixed(5)}</td></tr>`).join('') || '<tr><td colspan="2">No location history available.</td></tr>'}</tbody></table>`;
+  $('locationHistory').innerHTML = `<table class="data-table"><thead><tr><th>When</th><th>Location</th></tr></thead><tbody>${state.locations.slice(0, 10).map(location => `<tr><td>${esc(fmtDate(recordTime(location)))}</td><td>${Number(location.latitude).toFixed(5)}, ${Number(location.longitude).toFixed(5)}</td></tr>`).join('') || '<tr><td colspan="2">No location history available.</td></tr>'}</tbody></table>`;
 }
 
 function renderDevices() {
@@ -362,7 +368,7 @@ function renderDevices() {
 
 function renderAccess() {
   $('accessCount').textContent = state.access.length;
-  $('accessTable').innerHTML = `<table class="data-table"><thead><tr><th>PERSON</th><th>ROLE</th><th>STATUS</th><th></th></tr></thead><tbody>${state.access.map(access => `<tr><td><b>${esc(access.email || access.name || 'Family member')}</b></td><td>${esc(access.role || 'Family member')}</td><td><span class="severity low">Active</span></td><td><button class="text-btn access-remove" data-user-id="${esc(access.user_id)}">Remove</button></td></tr>`).join('') || '<tr><td colspan="4">No family members have access.</td></tr>'}</tbody></table>`;
+  $('accessTable').innerHTML = `<table class="data-table"><thead><tr><th>Person</th><th>Role</th><th>Status</th><th></th></tr></thead><tbody>${state.access.map(access => `<tr><td><b>${esc(access.email || access.name || 'Family member')}</b></td><td>${esc(access.role || 'Family member')}</td><td><span class="severity low">Active</span></td><td><button class="text-btn access-remove" data-user-id="${esc(access.user_id)}">Remove</button></td></tr>`).join('') || '<tr><td colspan="4">No family members have access.</td></tr>'}</tbody></table>`;
   document.querySelectorAll('.access-remove').forEach(button => {
     button.addEventListener('click', () => revokeAccess(button.dataset.userId));
   });
@@ -399,14 +405,14 @@ function initMap(main = false) {
 
   const history = state.locations.slice().reverse().map(item => [Number(item.latitude), Number(item.longitude)]);
   if (history.length > 1) {
-    L.polyline(history, { color: '#55b993', weight: 4, opacity: 0.72, dashArray: main ? '' : '6 8' }).addTo(map);
+    L.polyline(history, { color: '#2679a6', weight: 4, opacity: 1, dashArray: main ? '' : '6 8' }).addTo(map);
   }
 
   const latest = L.circleMarker([location.latitude, location.longitude], {
     radius: 10,
-    color: '#0f2c24',
+    color: '#ffffff',
     weight: 3,
-    fillColor: '#66d1a7',
+    fillColor: '#17785a',
     fillOpacity: 1
   }).addTo(map);
 
@@ -420,9 +426,9 @@ function initMap(main = false) {
       const distance = uiDistanceMeters(event);
       L.circleMarker([eventLocation.latitude, eventLocation.longitude], {
         radius: 6,
-        color: '#562f2b',
+        color: '#ffffff',
         weight: 2,
-        fillColor: severity === 'High' ? '#e97b70' : '#e7b56d',
+        fillColor: severity === 'High' ? '#b4492a' : '#946200',
         fillOpacity: 0.95
       }).addTo(map).bindPopup(`<b>Obstacle detected</b><br>${esc(uiDirection(event.direction))} · ${distance.toFixed(1)} m<br><small>${esc(fmtAgo(recordTime(event)))}</small>`);
     });

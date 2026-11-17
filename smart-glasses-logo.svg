@@ -1,24 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 96" role="img" aria-labelledby="title desc">
-  <title id="title">Smart Eyeglasses</title>
-  <desc id="desc">A balanced symbolic smart eyeglasses mark with two rounded lenses, a bridge, temples, and sensor dots.</desc>
-  <defs>
-    <linearGradient id="frame" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#31584c"/>
-      <stop offset="1" stop-color="#17372e"/>
-    </linearGradient>
-    <linearGradient id="lens" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#effff8"/>
-      <stop offset="1" stop-color="#a8dbc9"/>
-    </linearGradient>
-  </defs>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 96" role="img" aria-label="Smart Eyeglasses">
   <g fill="none" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M14 35 5 29M146 35l9-6" stroke="#21473b" stroke-width="7"/>
-    <rect x="17" y="25" width="55" height="42" rx="16" fill="url(#lens)" stroke="url(#frame)" stroke-width="8"/>
-    <rect x="88" y="25" width="55" height="42" rx="16" fill="url(#lens)" stroke="url(#frame)" stroke-width="8"/>
-    <path d="M72 40c3-7 13-7 16 0" stroke="#21473b" stroke-width="7"/>
-    <circle cx="44.5" cy="46" r="7.5" fill="#f2fff9" stroke="#4b8d78" stroke-width="3"/>
-    <circle cx="44.5" cy="46" r="3.2" fill="#4fd49b" stroke="none"/>
-    <circle cx="115.5" cy="46" r="7.5" fill="#f2fff9" stroke="#4b8d78" stroke-width="3"/>
-    <circle cx="115.5" cy="46" r="3.2" fill="#4fd49b" stroke="none"/>
+    <path d="M58 14a30 30 0 0 1 44 0" stroke="#2679a6" stroke-width="6"/>
+    <path d="M68 24a16 16 0 0 1 24 0" stroke="#17785a" stroke-width="6"/>
+    <rect x="12" y="38" width="55" height="42" rx="14" fill="#e4f2f8" stroke="#10303a" stroke-width="7"/>
+    <rect x="93" y="38" width="55" height="42" rx="14" fill="#e4f2f8" stroke="#10303a" stroke-width="7"/>
+    <path d="M67 54c4-6 22-6 26 0" stroke="#10303a" stroke-width="7"/>
+    <circle cx="39.5" cy="59" r="6" fill="#17785a" stroke="none"/>
+    <circle cx="120.5" cy="59" r="6" fill="#17785a" stroke="none"/>
   </g>
 </svg>

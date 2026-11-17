@@ -1,4 +1,4 @@
-const CACHE_NAME = 'smart-eyeglasses-live-shell-v3';
+const CACHE_NAME = 'smart-eyeglasses-live-shell-v4';
 const APP_SHELL = [
   './',
   './index.html',
