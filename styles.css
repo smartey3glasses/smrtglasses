@@ -3,37 +3,37 @@
    Warm tones appear only when something needs attention. */
 
 :root {
-  --bg: #f1f8fb;
-  --card: #ffffff;
-  --soft: #e4f2f8;
-  --mint: #e1f4ea;
-  --faint: #cfe3ea;
-  --ink: #10303a;
-  --muted: #546f7a;
-  --sky: #2679a6;
-  --green: #17785a;
-  --on-green: #ffffff;
+  --bg: #f3f0e7;
+  --card: #fffdf8;
+  --soft: #ece8de;
+  --mint: #e5eee5;
+  --faint: #d8d5ca;
+  --ink: #24332d;
+  --muted: #69766e;
+  --sky: #477f78;
+  --green: #286b52;
+  --on-green: #fffdf8;
   --warn: #b4492a;
   --amber: #946200;
   --radius: 14px;
-  --lift: 0 10px 30px rgba(16, 48, 58, .14);
+  --lift: 0 10px 30px rgba(48, 52, 42, .10);
   --font: 'Atkinson Hyperlegible', system-ui, -apple-system, 'Segoe UI', sans-serif;
 }
 
 body.dark-mode {
-  --bg: #0c181d;
-  --card: #12242a;
-  --soft: #183039;
-  --mint: #123228;
-  --faint: #2a444c;
-  --ink: #e4f2f4;
-  --muted: #8fb1b9;
-  --sky: #6cc0ea;
-  --green: #4cc79b;
-  --on-green: #07261c;
-  --warn: #f08a6a;
-  --amber: #e3b25a;
-  --lift: 0 10px 30px rgba(0, 0, 0, .45);
+  --bg: #061b16;
+  --card: #0b261e;
+  --soft: #102e24;
+  --mint: #153d2d;
+  --faint: #28513e;
+  --ink: #e6f2e9;
+  --muted: #a0b9aa;
+  --sky: #82c5ac;
+  --green: #64d6a1;
+  --on-green: #062318;
+  --warn: #f08f72;
+  --amber: #e6bd70;
+  --lift: 0 10px 30px rgba(0, 0, 0, .34);
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -313,13 +313,11 @@ input:focus { outline: 3px solid var(--sky); outline-offset: 0; }
   min-height: 100vh;
   display: grid;
   place-items: center;
-  background: #e4f2f8;
+  background: transparent;
   color: var(--ink);
   overflow: hidden;
 }
 .glasses-showcase {
-  position: relative;
-  z-index: 1;
   width: 100%;
   min-height: 100vh;
   display: flex;
@@ -330,10 +328,9 @@ input:focus { outline: 3px solid var(--sky); outline-offset: 0; }
 }
 .glasses-viewer {
   position: relative;
-  z-index: 1;
-  width: min(94%, 780px);
-  height: clamp(340px, 58vh, 580px);
-  min-height: 340px;
+  width: min(82%, 620px);
+  height: clamp(280px, 48vh, 460px);
+  min-height: 280px;
   overflow: hidden;
   cursor: grab;
   touch-action: pan-y;
@@ -380,7 +377,7 @@ input:focus { outline: 3px solid var(--sky); outline-offset: 0; }
   .login-view { grid-template-columns: minmax(300px, .95fr) minmax(0, 1.05fr); }
   .login-visual { display: grid; min-height: 100vh; }
   .glasses-showcase { padding: 24px 12px; }
-  .glasses-viewer { width: min(96%, 620px); height: clamp(300px, 50vh, 460px); min-height: 300px; }
+  .glasses-viewer { width: min(92%, 500px); height: clamp(260px, 42vh, 380px); min-height: 260px; }
 }
 @media (max-width: 700px) {
   .login-view { grid-template-columns: 1fr; }
@@ -389,35 +386,39 @@ input:focus { outline: 3px solid var(--sky); outline-offset: 0; }
 }
 
 
-/* Dark-mode device showcase: deep green technical grid, limited to the right panel. */
-body.dark-mode .login-visual {
-  position: relative;
-  isolation: isolate;
-  background-color: #061b16 !important;
+/* ---------- unified product-wide theme surfaces ---------- */
+body {
+  background-color: var(--bg);
   background-image:
-    radial-gradient(ellipse at 50% 48%, rgba(14, 93, 62, .30), transparent 66%) !important;
+    linear-gradient(rgba(91, 96, 84, .075) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(91, 96, 84, .075) 1px, transparent 1px);
+  background-size: 36px 36px;
+  background-attachment: fixed;
 }
-body.dark-mode .login-visual::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  opacity: .58;
+body.dark-mode {
   background-image:
-    linear-gradient(rgba(64, 205, 145, .13) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(64, 205, 145, .13) 1px, transparent 1px),
-    linear-gradient(rgba(64, 205, 145, .045) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(64, 205, 145, .045) 1px, transparent 1px);
-  background-size: 44px 44px, 44px 44px, 11px 11px, 11px 11px;
-  mask-image: radial-gradient(ellipse at center, #000 30%, rgba(0,0,0,.78) 72%, transparent 100%);
+    linear-gradient(rgba(94, 211, 151, .13) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(94, 211, 151, .13) 1px, transparent 1px),
+    linear-gradient(rgba(94, 211, 151, .035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(94, 211, 151, .035) 1px, transparent 1px);
+  background-size: 42px 42px, 42px 42px, 10.5px 10.5px, 10.5px 10.5px;
+}
+.login-visual {
+  background: transparent !important;
+  border-left: 1px solid rgba(93, 105, 91, .10);
+}
+body.dark-mode .login-visual {
+  background: transparent !important;
+  border-left-color: rgba(94, 211, 151, .12);
+}
+.glasses-viewer {
+  background: radial-gradient(ellipse at 50% 54%, rgba(255,253,248,.72) 0%, rgba(255,253,248,.24) 42%, transparent 74%);
 }
 body.dark-mode .glasses-viewer {
-  background: radial-gradient(ellipse at 50% 52%, rgba(20, 112, 76, .20), rgba(4, 25, 19, .04) 58%, transparent 78%);
+  background: radial-gradient(ellipse at 50% 52%, rgba(27, 112, 73, .22), rgba(4, 25, 19, .04) 58%, transparent 78%);
 }
-body.dark-mode .glasses-hint { color: #8bbda6; }
 body.dark-mode .glasses-loading,
-body.dark-mode .glasses-error { color: #a5d7bd; }
+body.dark-mode .glasses-error { color: #b4d9c2; }
 body.dark-mode .glasses-loading-mark {
   border-color: rgba(105, 224, 164, .2);
   border-top-color: #65d99d;

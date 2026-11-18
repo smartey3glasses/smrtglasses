@@ -16,7 +16,6 @@ if (viewer) {
   let lastInteraction = 0;
   let lastFrame = 0;
 
-  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   function fail(message) {
     if (loading) loading.classList.add('hidden');
@@ -190,7 +189,7 @@ viewer.dataset.viewerState = 'ready';
         lastFrame = now;
 
         const recentlyTouched = now - lastInteraction < 850;
-        if (modelPivot && !reducedMotion && !dragging && !recentlyTouched) {
+        if (modelPivot && !dragging && !recentlyTouched) {
           modelPivot.rotation.y += delta * 0.2;
         }
 
