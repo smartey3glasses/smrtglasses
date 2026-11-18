@@ -190,7 +190,7 @@ viewer.dataset.viewerState = 'ready';
 
         const recentlyTouched = now - lastInteraction < 850;
         if (modelPivot && !dragging && !recentlyTouched) {
-          modelPivot.rotation.y -= delta * 0.2;
+          modelPivot.rotation.y -= delta * 0.36;
         }
 
         controls.update();

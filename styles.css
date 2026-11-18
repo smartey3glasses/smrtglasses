@@ -475,3 +475,22 @@ body.dark-mode .login-view {
   background-color: var(--bg);
   background-image: none !important;
 }
+
+
+/* ---------- expanded 3D viewport and breathing room ---------- */
+.glasses-showcase {
+  padding: 12px clamp(6px, 1vw, 16px);
+}
+.glasses-viewer {
+  width: min(100%, 1120px);
+  height: clamp(500px, 82vh, 900px);
+  min-height: 500px;
+}
+@media (max-width: 1100px) and (min-width: 701px) {
+  .glasses-showcase { padding: 10px 4px; }
+  .glasses-viewer {
+    width: 100%;
+    height: clamp(420px, 74vh, 760px);
+    min-height: 420px;
+  }
+}
