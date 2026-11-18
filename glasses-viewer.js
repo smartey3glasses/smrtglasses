@@ -159,8 +159,8 @@ if (viewer) {
 
       const modelRadius = Math.max((geometry.boundingSphere?.radius || largestDimension / 2) * mesh.scale.x, 0.5);
       const fitDistance = Math.max(
-        3.7,
-        modelRadius / Math.sin(THREE.MathUtils.degToRad(camera.fov / 2)) * 1.18
+        2.9,
+        modelRadius / Math.sin(THREE.MathUtils.degToRad(camera.fov / 2)) * 0.88
       );
 
       camera.position.set(0, 0.12, fitDistance);
@@ -168,7 +168,7 @@ if (viewer) {
       camera.far = fitDistance * 30;
       camera.updateProjectionMatrix();
 
-      controls.minDistance = Math.max(2.3, modelRadius * 1.1);
+      controls.minDistance = Math.max(1.8, modelRadius * 0.85);
       controls.maxDistance = Math.max(8, modelRadius * 5.5);
       controls.update();
 

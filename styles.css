@@ -423,3 +423,24 @@ body.dark-mode .glasses-loading-mark {
   border-color: rgba(105, 224, 164, .2);
   border-top-color: #65d99d;
 }
+
+
+/* ---------- larger default Smart Eyeglasses presentation ---------- */
+.glasses-showcase {
+  width: 100%;
+  min-height: 100vh;
+  padding: 20px clamp(12px, 2vw, 28px);
+}
+.glasses-viewer {
+  width: min(96%, 900px);
+  height: clamp(420px, 70vh, 760px);
+  min-height: 420px;
+}
+@media (max-width: 1100px) and (min-width: 701px) {
+  .glasses-showcase { padding: 18px 8px; }
+  .glasses-viewer {
+    width: min(98%, 760px);
+    height: clamp(360px, 64vh, 620px);
+    min-height: 360px;
+  }
+}
