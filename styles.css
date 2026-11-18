@@ -306,35 +306,81 @@ input:focus { outline: 3px solid var(--sky); outline-offset: 0; }
 .nav-item { line-height: 1.15; }
 
 
-/* Interactive STL showcase on the login screen */
+/* ---------- compact Smart Eyeglasses login showcase ---------- */
 .login-visual {
-  position: relative !important;
+  position: relative;
+  min-width: 0;
   min-height: 100vh;
-  display: grid !important;
+  display: grid;
   place-items: center;
+  background: #e4f2f8;
+  color: var(--ink);
   overflow: hidden;
-  color: #1c7b68 !important;
-  background: radial-gradient(ellipse at 50% 46%, #f7fffc 0%, #e9f6f3 48%, #dcefeb 100%) !important;
 }
-.login-visual::before, .login-visual::after {
-  content: ""; position: absolute; border: 1px solid rgba(43,137,116,.12); border-radius: 50%;
-  width: min(68vw, 700px); aspect-ratio: 1; pointer-events: none;
+.glasses-showcase {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px clamp(20px, 3.5vw, 48px);
 }
-.login-visual::after { width: min(48vw, 500px); }
-.model-stage { position: relative; z-index: 1; width: min(92%, 760px); height: min(82vh, 700px); min-height: 440px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-#glassesViewer { width: 100%; height: calc(100% - 68px); min-height: 360px; display: block; outline: none; cursor: grab; touch-action: pan-y; }
-#glassesViewer:active { cursor: grabbing; }
-.model-caption { position: absolute; top: 4px; left: 5%; display: flex; align-items: center; gap: 9px; color: #316c5d; font-size: 11px; font-weight: 800; letter-spacing: .16em; }
-.model-status-dot { width: 7px; height: 7px; border-radius: 50%; background: #21866d; box-shadow: 0 0 0 4px rgba(33,134,109,.12); }
-.model-caption-sub { margin-left: 7px; color: #85a99e; font-weight: 600; letter-spacing: .1em; }
-.model-hint { position: absolute; bottom: 5px; display: flex; align-items: center; gap: 9px; color: #668b80; font-size: 12px; font-weight: 600; letter-spacing: .02em; }
-.model-hint-icon { font-size: 18px; color: #21866d; }
-.model-hint-divider { color: #a0bdb4; }
-@media (max-width: 760px) {
-  .login-view { grid-template-columns: 1fr !important; }
-  .login-panel { min-height: auto; padding: 42px 28px !important; }
-  .login-visual { display: grid !important; min-height: 390px !important; }
-  .model-stage { width: 100%; height: 380px; min-height: 350px; }
-  #glassesViewer { min-height: 290px; }
-  .model-caption { top: 0; left: 8%; }
+.glasses-viewer {
+  position: relative;
+  width: min(82%, 620px);
+  height: clamp(280px, 48vh, 460px);
+  min-height: 280px;
+  overflow: hidden;
+  cursor: grab;
+  touch-action: pan-y;
+  outline: none;
+  background: radial-gradient(ellipse at 50% 54%, rgba(255,255,255,.62) 0%, rgba(255,255,255,.20) 42%, rgba(255,255,255,0) 74%);
+}
+.glasses-viewer:active { cursor: grabbing; }
+.glasses-viewer canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.glasses-loading, .glasses-error {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 14px;
+  color: #54717b;
+  font-size: 14px;
+  pointer-events: none;
+  z-index: 2;
+}
+.glasses-loading.hidden, .glasses-error.hidden { display: none !important; }
+.glasses-loading-mark {
+  width: 26px;
+  height: 26px;
+  border: 3px solid rgba(38,121,166,.18);
+  border-top-color: #2679a6;
+  border-radius: 50%;
+  animation: glasses-loading-spin .8s linear infinite;
+}
+@keyframes glasses-loading-spin { to { transform: rotate(360deg); } }
+.glasses-hint {
+  color: #66818a;
+  font-size: 12px;
+  letter-spacing: .02em;
+  text-align: center;
+  margin: 2px 0 0;
+}
+@media (max-width: 960px) and (min-width: 701px) {
+  .login-view { grid-template-columns: minmax(300px, .95fr) minmax(0, 1.05fr); }
+  .login-visual { display: grid; min-height: 100vh; }
+  .glasses-showcase { padding: 24px 12px; }
+  .glasses-viewer { width: min(92%, 500px); height: clamp(260px, 42vh, 380px); min-height: 260px; }
+}
+@media (max-width: 700px) {
+  .login-view { grid-template-columns: 1fr; }
+  .login-panel { min-height: 100vh; }
+  .login-visual { display: none; }
 }
