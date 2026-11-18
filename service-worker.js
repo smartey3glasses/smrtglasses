@@ -1,18 +1,33 @@
-const CACHE_NAME = 'smart-eyeglasses-live-shell-v6';
+const CACHE_NAME = 'smart-eyeglasses-live-shell-v7';
+
 const APP_SHELL = [
   './',
   './index.html',
   './styles.css',
-  './app.js',\n  './glasses-viewer.js',
+  './app.js',
+  './glasses-viewer.js',
   './config.js',
   './smart-glasses-logo.svg',
   './manifest.webmanifest',
   './pwa-icon-192.png',
-  './pwa-icon-512.png'
+  './pwa-icon-512.png',
+  './assets/models/base.stl'
 ];
 
 self.addEventListener('install', event => {
-  event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)));
+  // Install the shell even if an optional asset is temporarily unavailable.
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(async cache => {
+      await Promise.all(APP_SHELL.map(async path => {
+        try {
+          const response = await fetch(path, { cache: 'reload' });
+          if (response.ok) await cache.put(path, response);
+        } catch (error) {
+          console.warn('Could not precache:', path, error);
+        }
+      }));
+    })
+  );
   self.skipWaiting();
 });
 
@@ -29,17 +44,15 @@ self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
 
   const url = new URL(event.request.url);
-  if (url.origin !== self.location.origin) {
-    event.respondWith(fetch(event.request).catch(() => caches.match(event.request).then(hit => hit || Response.error())));
-    return;
-  }
+  if (url.origin !== self.location.origin) return;
 
-  const isLiveAppAsset = /\/(?:index\.html|app\.js|config\.js)$/.test(url.pathname) || url.pathname.endsWith('/');
+  const path = url.pathname;
+  const isHtmlOrAppScript = /\/(?:index\.html|app\.js|config\.js|glasses-viewer\.js)$/.test(path) || path.endsWith('/');
 
-  if (isLiveAppAsset) {
+  if (isHtmlOrAppScript) {
     event.respondWith(
       fetch(new Request(event.request, { cache: 'no-store' })).then(response => {
-        if (response && response.ok) {
+        if (response.ok) {
           const copy = response.clone();
           caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
         }
@@ -50,12 +63,15 @@ self.addEventListener('fetch', event => {
   }
 
   event.respondWith(
-    caches.match(event.request).then(cached => cached || fetch(event.request).then(response => {
-      if (response && response.ok) {
-        const copy = response.clone();
-        caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
-      }
-      return response;
-    }).catch(() => caches.match('./index.html')))
+    caches.match(event.request).then(cached => {
+      if (cached) return cached;
+      return fetch(event.request).then(response => {
+        if (response.ok) {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
+        }
+        return response;
+      });
+    })
   );
 });

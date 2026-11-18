@@ -16,7 +16,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Smart Eyeglasses" />
-  <link rel="apple-touch-icon" href="pwa-icon-192.png" />\n  <script type="importmap">
+  <link rel="apple-touch-icon" href="pwa-icon-192.png" />
+  <script type="importmap">
     {
       "imports": {
         "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
@@ -215,7 +216,21 @@
   <script src="config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
-  <script src="app.js"></script>\n  <script type="module" src="glasses-viewer.js"></script>
+  <script src="app.js"></script>
+  <script type="module" src="glasses-viewer.js"></script>
+<script>
+    window.setTimeout(() => {
+      const loading = document.getElementById('glassesLoading');
+      const error = document.getElementById('glassesError');
+      if (loading && !loading.classList.contains('hidden')) {
+        loading.classList.add('hidden');
+        if (error) {
+          error.textContent = '3D preview could not start. Check the viewer files and internet connection, then refresh.';
+          error.classList.remove('hidden');
+        }
+      }
+    }, 15000);
+  </script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(() => {}));
