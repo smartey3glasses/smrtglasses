@@ -5,44 +5,37 @@ if (viewer) {
   const errorBox = document.getElementById('glassesError');
   const hint = document.getElementById('glassesHint');
 
-  let renderer = null;
-  let scene = null;
-  let camera = null;
-  let controls = null;
-  let modelPivot = null;
-  let resizeObserver = null;
-  let animationId = 0;
+  let renderer, scene, camera, controls, modelPivot, frameId;
   let disposed = false;
-  let pointerInside = false;
-  let dragging = false;
+  let interacting = false;
   let lastInteraction = 0;
-  let lastFrame = 0;
+  let resizeObserver;
 
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const clock = { last: 0 };
 
-  function fail(message) {
+  function setError(message) {
     if (loading) loading.classList.add('hidden');
     if (errorBox) {
       errorBox.textContent = message || 'The 3D model could not be loaded. Please refresh the page.';
       errorBox.classList.remove('hidden');
     }
     if (hint) hint.textContent = 'Device preview unavailable';
-    console.error('[Smart Eyeglasses 3D viewer]', message);
+    console.error('[Smart Eyeglasses viewer]', message);
   }
 
   function loginIsVisible() {
     const login = document.getElementById('loginView');
-    return !document.hidden && !!login && !login.classList.contains('hidden');
+    return !!login && !login.classList.contains('hidden') && !document.hidden;
   }
 
-  async function initialize() {
+  async function start() {
     try {
-      // Use the import map in index.html. Errors are caught and shown in the viewer.
+      // Dynamic imports let us show a useful error instead of leaving the loader spinning
+      // forever if the CDN, import map, or browser module support is unavailable.
       const THREE = await import('three');
-      const [{ STLLoader }, { OrbitControls }] = await Promise.all([
-        import('three/addons/loaders/STLLoader.js'),
-        import('three/addons/controls/OrbitControls.js')
-      ]);
+      const { STLLoader } = await import('three/addons/loaders/STLLoader.js');
+      const { OrbitControls } = await import('three/addons/controls/OrbitControls.js');
 
       if (disposed) return;
 
@@ -50,8 +43,8 @@ if (viewer) {
       const height = Math.max(viewer.clientHeight, 1);
 
       scene = new THREE.Scene();
-      camera = new THREE.PerspectiveCamera(34, width / height, 0.01, 1000);
-      camera.position.set(0, 0.1, 5);
+      camera = new THREE.PerspectiveCamera(34, width / height, 0.01, 100);
+      camera.position.set(0, 0.15, 5);
 
       renderer = new THREE.WebGLRenderer({
         alpha: true,
@@ -63,72 +56,59 @@ if (viewer) {
       renderer.outputColorSpace = THREE.SRGBColorSpace;
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
       renderer.toneMappingExposure = 1.15;
-      renderer.domElement.setAttribute('aria-label', 'Interactive 3D model of the Smart Eyeglasses');
+      renderer.domElement.setAttribute('aria-hidden', 'true');
       viewer.prepend(renderer.domElement);
 
-      scene.add(new THREE.HemisphereLight(0xffffff, 0xc3d9df, 1.8));
-
-      const keyLight = new THREE.DirectionalLight(0xffffff, 2.7);
-      keyLight.position.set(3.5, 4.5, 5);
-      scene.add(keyLight);
-
-      const fillLight = new THREE.DirectionalLight(0xc5efff, 1.2);
-      fillLight.position.set(-4, 1.5, 2.5);
-      scene.add(fillLight);
-
-      const rimLight = new THREE.DirectionalLight(0x8fd5c0, 1.6);
-      rimLight.position.set(0, 2, -4);
-      scene.add(rimLight);
+      scene.add(new THREE.HemisphereLight(0xffffff, 0xc3d9df, 2.0));
+      const key = new THREE.DirectionalLight(0xffffff, 2.8);
+      key.position.set(3.5, 4.5, 5);
+      scene.add(key);
+      const fill = new THREE.DirectionalLight(0xc5efff, 1.25);
+      fill.position.set(-4, 1.5, 2.5);
+      scene.add(fill);
+      const rim = new THREE.DirectionalLight(0x8fd5c0, 1.7);
+      rim.position.set(0, 2, -4);
+      scene.add(rim);
 
       controls = new OrbitControls(camera, renderer.domElement);
       controls.enableDamping = true;
-      controls.dampingFactor = 0.065;
+      controls.dampingFactor = 0.07;
       controls.enablePan = false;
       controls.enableZoom = true;
-      controls.rotateSpeed = 0.7;
-      controls.zoomSpeed = 0.8;
       controls.minDistance = 2.4;
-      controls.maxDistance = 12;
+      controls.maxDistance = 8;
+      controls.rotateSpeed = 0.65;
+      controls.zoomSpeed = 0.75;
       controls.target.set(0, 0, 0);
-
       controls.addEventListener('start', () => {
-        dragging = true;
+        interacting = true;
         lastInteraction = performance.now();
       });
       controls.addEventListener('end', () => {
-        dragging = false;
         lastInteraction = performance.now();
       });
 
-      viewer.addEventListener('pointerenter', () => { pointerInside = true; });
-      viewer.addEventListener('pointerleave', () => {
-        pointerInside = false;
-        lastInteraction = performance.now();
-      });
       viewer.addEventListener('pointerdown', () => {
-        dragging = true;
+        interacting = true;
         lastInteraction = performance.now();
       });
       window.addEventListener('pointerup', () => {
-        dragging = false;
+        interacting = false;
         lastInteraction = performance.now();
       });
 
-      // Fetch with an explicit path and status check; this catches missing Vercel assets.
-      const modelPath = new URL('./assets/models/base.stl', document.baseURI);
-      const response = await fetch(modelPath.href, { cache: 'no-store' });
+      const modelUrl = new URL('./assets/models/base.stl', document.baseURI);
+      const response = await fetch(modelUrl.href, { cache: 'no-cache' });
       if (!response.ok) {
-        throw new Error(`STL file request failed (${response.status}). Confirm assets/models/base.stl exists in the deployed project.`);
+        throw new Error(`Could not fetch base.stl (${response.status} ${response.statusText}). Check that assets/models/base.stl was deployed.`);
       }
+      const buffer = await response.arrayBuffer();
+      if (!buffer.byteLength) throw new Error('base.stl was downloaded but is empty.');
 
-      const stlBuffer = await response.arrayBuffer();
-      if (stlBuffer.byteLength < 84) {
-        throw new Error('The STL file is missing, empty, or incomplete.');
-      }
-
-      const geometry = new STLLoader().parse(stlBuffer);
-      if (!geometry?.attributes?.position?.count) {
-        throw new Error('The STL file loaded but contains no renderable 3D geometry.');
+      const loader = new STLLoader();
+      const geometry = loader.parse(buffer);
+      if (!geometry || !geometry.attributes || !geometry.attributes.position || !geometry.attributes.position.count) {
+        throw new Error('base.stl loaded, but it does not contain usable triangle geometry.');
       }
 
       geometry.computeVertexNormals();
@@ -136,82 +116,67 @@ if (viewer) {
       geometry.computeBoundingSphere();
 
       const bounds = geometry.boundingBox;
-      const dimensions = new THREE.Vector3();
+      const size = new THREE.Vector3();
+      bounds.getSize(size);
       const center = new THREE.Vector3();
-      bounds.getSize(dimensions);
       bounds.getCenter(center);
+      geometry.translate(-center.x, -center.y, -center.z);
 
-      const largestDimension = Math.max(dimensions.x, dimensions.y, dimensions.z);
-      if (!Number.isFinite(largestDimension) || largestDimension <= 0) {
+      const maxDimension = Math.max(size.x, size.y, size.z);
+      if (!Number.isFinite(maxDimension) || maxDimension <= 0) {
         throw new Error('The STL model has invalid dimensions.');
       }
 
-      geometry.translate(-center.x, -center.y, -center.z);
-
       const material = new THREE.MeshStandardMaterial({
         color: 0x244b55,
-        metalness: 0.28,
-        roughness: 0.42
+        metalness: 0.32,
+        roughness: 0.4
       });
-
       const mesh = new THREE.Mesh(geometry, material);
-
-      // The supplied STL is authored with its height on Z and temple depth on Y.
-      // Reorient it so Z becomes the viewer's vertical Y axis and the front faces
-      // the camera along +Z. This keeps the glasses upright during Y-axis turntable rotation.
-      mesh.rotation.x = -Math.PI / 2;
-      mesh.scale.setScalar(2.45 / largestDimension);
+      mesh.scale.setScalar(2.55 / maxDimension);
 
       modelPivot = new THREE.Group();
       modelPivot.add(mesh);
       scene.add(modelPivot);
 
-      const modelRadius = Math.max((geometry.boundingSphere?.radius || largestDimension / 2) * mesh.scale.x, 0.5);
-      const fitDistance = Math.max(
-        3.7,
-        modelRadius / Math.sin(THREE.MathUtils.degToRad(camera.fov / 2)) * 1.18
-      );
-
-      camera.position.set(0, 0.12, fitDistance);
-      camera.near = Math.max(0.01, fitDistance / 100);
-      camera.far = fitDistance * 30;
+      // Fit the full model inside the viewer regardless of the STL's original units.
+      const radius = Math.max(geometry.boundingSphere.radius * mesh.scale.x, 0.5);
+      const distance = Math.max(3.8, radius / Math.sin(THREE.MathUtils.degToRad(camera.fov / 2)) * 1.12);
+      camera.position.set(0, 0.12, distance);
+      camera.near = Math.max(0.01, distance / 100);
+      camera.far = distance * 30;
       camera.updateProjectionMatrix();
-
-      controls.minDistance = Math.max(2.3, modelRadius * 1.1);
-      controls.maxDistance = Math.max(8, modelRadius * 5.5);
+      controls.minDistance = Math.max(2.2, radius * 1.15);
+      controls.maxDistance = Math.max(7, radius * 5.5);
       controls.update();
 
       if (loading) loading.classList.add('hidden');
-      if (errorBox) errorBox.classList.add('hidden');
-      if (hint) {
-        hint.textContent = reducedMotion
-          ? 'Drag to rotate · Scroll to zoom'
-          : 'Drag to explore · Scroll to zoom';
-      }
-      viewer.dataset.viewerState = 'ready';
+      if (hint) hint.textContent = reducedMotion
+        ? 'Drag to rotate · Scroll to zoom'
+        : 'Drag to explore · Scroll to zoom';
 
       function animate(now) {
         if (disposed) return;
-        animationId = requestAnimationFrame(animate);
+        frameId = requestAnimationFrame(animate);
 
         if (!loginIsVisible()) {
-          lastFrame = now;
+          clock.last = now;
           return;
         }
 
-        const delta = lastFrame ? Math.min((now - lastFrame) / 1000, 0.05) : 0;
-        lastFrame = now;
+        const delta = clock.last ? Math.min((now - clock.last) / 1000, 0.05) : 0;
+        clock.last = now;
 
-        const recentlyTouched = now - lastInteraction < 850;
-        if (modelPivot && !reducedMotion && !pointerInside && !dragging && !recentlyTouched) {
-          modelPivot.rotation.y += delta * 0.2;
+        const recentlyInteracted = now - lastInteraction < 900;
+        if (modelPivot && !interacting && !recentlyInteracted) {
+          modelPivot.rotation.y += delta * 0.28;
         }
 
         controls.update();
         renderer.render(scene, camera);
       }
 
-      animationId = requestAnimationFrame(animate);
+      frameId = requestAnimationFrame(animate);
 
       resizeObserver = new ResizeObserver(() => {
         if (!renderer || !camera) return;
@@ -223,17 +188,16 @@ if (viewer) {
       });
       resizeObserver.observe(viewer);
 
-    } catch (error) {
-      viewer.dataset.viewerState = 'error';
-      fail(error?.message || String(error));
+    } catch (err) {
+      setError(err && err.message ? err.message : String(err));
     }
   }
 
-  initialize();
+  start();
 
   window.addEventListener('pagehide', () => {
     disposed = true;
-    if (animationId) cancelAnimationFrame(animationId);
+    if (frameId) cancelAnimationFrame(frameId);
     resizeObserver?.disconnect();
     controls?.dispose();
     modelPivot?.traverse(object => {

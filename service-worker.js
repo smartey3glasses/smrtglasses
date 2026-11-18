@@ -1,5 +1,4 @@
-const CACHE_NAME = 'smart-eyeglasses-live-shell-v8';
-
+const CACHE_NAME = 'smart-eyeglasses-live-shell-v6';
 const APP_SHELL = [
   './',
   './index.html',
@@ -10,24 +9,11 @@ const APP_SHELL = [
   './smart-glasses-logo.svg',
   './manifest.webmanifest',
   './pwa-icon-192.png',
-  './pwa-icon-512.png',
-  './assets/models/base.stl'
+  './pwa-icon-512.png'
 ];
 
 self.addEventListener('install', event => {
-  // Install the shell even if an optional asset is temporarily unavailable.
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(async cache => {
-      await Promise.all(APP_SHELL.map(async path => {
-        try {
-          const response = await fetch(path, { cache: 'reload' });
-          if (response.ok) await cache.put(path, response);
-        } catch (error) {
-          console.warn('Could not precache:', path, error);
-        }
-      }));
-    })
-  );
+  event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)));
   self.skipWaiting();
 });
 
@@ -44,15 +30,17 @@ self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
 
   const url = new URL(event.request.url);
-  if (url.origin !== self.location.origin) return;
+  if (url.origin !== self.location.origin) {
+    event.respondWith(fetch(event.request).catch(() => caches.match(event.request).then(hit => hit || Response.error())));
+    return;
+  }
 
-  const path = url.pathname;
-  const isHtmlOrAppScript = /\/(?:index\.html|app\.js|config\.js|glasses-viewer\.js)$/.test(path) || path.endsWith('/');
+  const isLiveAppAsset = /\/(?:index\.html|app\.js|config\.js)$/.test(url.pathname) || url.pathname.endsWith('/');
 
-  if (isHtmlOrAppScript) {
+  if (isLiveAppAsset) {
     event.respondWith(
       fetch(new Request(event.request, { cache: 'no-store' })).then(response => {
-        if (response.ok) {
+        if (response && response.ok) {
           const copy = response.clone();
           caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
         }
@@ -63,15 +51,12 @@ self.addEventListener('fetch', event => {
   }
 
   event.respondWith(
-    caches.match(event.request).then(cached => {
-      if (cached) return cached;
-      return fetch(event.request).then(response => {
-        if (response.ok) {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
-        }
-        return response;
-      });
-    })
+    caches.match(event.request).then(cached => cached || fetch(event.request).then(response => {
+      if (response && response.ok) {
+        const copy = response.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
+      }
+      return response;
+    }).catch(() => caches.match('./index.html')))
   );
 });
