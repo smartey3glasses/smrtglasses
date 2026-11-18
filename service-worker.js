@@ -1,9 +1,9 @@
-const CACHE_NAME = 'smart-eyeglasses-live-shell-v5';
+const CACHE_NAME = 'smart-eyeglasses-live-shell-v6';
 const APP_SHELL = [
   './',
   './index.html',
   './styles.css',
-  './app.js',
+  './app.js',\n  './glasses-viewer.js',
   './config.js',
   './smart-glasses-logo.svg',
   './manifest.webmanifest',
