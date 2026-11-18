@@ -304,3 +304,37 @@ input:focus { outline: 3px solid var(--sky); outline-offset: 0; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .filter-row .custom-select-trigger { min-width: 170px; }
 .nav-item { line-height: 1.15; }
+
+
+/* Interactive STL showcase on the login screen */
+.login-visual {
+  position: relative !important;
+  min-height: 100vh;
+  display: grid !important;
+  place-items: center;
+  overflow: hidden;
+  color: #1c7b68 !important;
+  background: radial-gradient(ellipse at 50% 46%, #f7fffc 0%, #e9f6f3 48%, #dcefeb 100%) !important;
+}
+.login-visual::before, .login-visual::after {
+  content: ""; position: absolute; border: 1px solid rgba(43,137,116,.12); border-radius: 50%;
+  width: min(68vw, 700px); aspect-ratio: 1; pointer-events: none;
+}
+.login-visual::after { width: min(48vw, 500px); }
+.model-stage { position: relative; z-index: 1; width: min(92%, 760px); height: min(82vh, 700px); min-height: 440px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+#glassesViewer { width: 100%; height: calc(100% - 68px); min-height: 360px; display: block; outline: none; cursor: grab; touch-action: pan-y; }
+#glassesViewer:active { cursor: grabbing; }
+.model-caption { position: absolute; top: 4px; left: 5%; display: flex; align-items: center; gap: 9px; color: #316c5d; font-size: 11px; font-weight: 800; letter-spacing: .16em; }
+.model-status-dot { width: 7px; height: 7px; border-radius: 50%; background: #21866d; box-shadow: 0 0 0 4px rgba(33,134,109,.12); }
+.model-caption-sub { margin-left: 7px; color: #85a99e; font-weight: 600; letter-spacing: .1em; }
+.model-hint { position: absolute; bottom: 5px; display: flex; align-items: center; gap: 9px; color: #668b80; font-size: 12px; font-weight: 600; letter-spacing: .02em; }
+.model-hint-icon { font-size: 18px; color: #21866d; }
+.model-hint-divider { color: #a0bdb4; }
+@media (max-width: 760px) {
+  .login-view { grid-template-columns: 1fr !important; }
+  .login-panel { min-height: auto; padding: 42px 28px !important; }
+  .login-visual { display: grid !important; min-height: 390px !important; }
+  .model-stage { width: 100%; height: 380px; min-height: 350px; }
+  #glassesViewer { min-height: 290px; }
+  .model-caption { top: 0; left: 8%; }
+}
