@@ -137,6 +137,11 @@ if (viewer) {
 
       modelPivot = new THREE.Group();
       modelPivot.add(mesh);
+
+      // Start from the opposite side of the STL so the login showcase presents
+      // the front-facing eyeglass frame rather than the temple/back view.
+      modelPivot.rotation.y = Math.PI;
+
       scene.add(modelPivot);
 
       // Fit the full model inside the viewer regardless of the STL's original units.
