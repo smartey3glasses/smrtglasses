@@ -444,3 +444,34 @@ body.dark-mode .glasses-loading-mark {
     min-height: 360px;
   }
 }
+
+
+/* ---------- keep the grid on the login showcase only ---------- */
+/* The app dashboard keeps the same ivory/deep-green theme tokens, but uses
+   calm, solid surfaces instead of the decorative login-page grid. */
+body,
+body.dark-mode {
+  background-image: none !important;
+  background-attachment: initial;
+}
+.login-view {
+  background-color: var(--bg);
+  background-image:
+    linear-gradient(rgba(91, 96, 84, .075) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(91, 96, 84, .075) 1px, transparent 1px);
+  background-size: 36px 36px;
+}
+body.dark-mode .login-view {
+  background-color: var(--bg);
+  background-image:
+    linear-gradient(rgba(94, 211, 151, .13) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(94, 211, 151, .13) 1px, transparent 1px),
+    linear-gradient(rgba(94, 211, 151, .035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(94, 211, 151, .035) 1px, transparent 1px);
+  background-size: 42px 42px, 42px 42px, 10.5px 10.5px, 10.5px 10.5px;
+}
+.app-shell,
+.main-content {
+  background-color: var(--bg);
+  background-image: none !important;
+}
