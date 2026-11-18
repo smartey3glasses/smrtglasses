@@ -112,7 +112,6 @@
             The 3D model could not be loaded. Please refresh the page.
           </div>
         </div>
-        <p class="glasses-hint" id="glassesHint">Drag to explore · Scroll to zoom</p>
       </div>
     </div>
   </section>
@@ -216,7 +215,21 @@
   <script src="config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
-  <script src="app.js"></script>\n  <script type="module" src="glasses-viewer.js?v=12"></script>
+  <script src="app.js"></script>
+  <script type="module" src="glasses-viewer.js?v=13"></script>
+<script>
+    window.setTimeout(() => {
+      const loading = document.getElementById('glassesLoading');
+      const error = document.getElementById('glassesError');
+      if (loading && !loading.classList.contains('hidden')) {
+        loading.classList.add('hidden');
+        if (error) {
+          error.textContent = '3D preview could not start. Check the viewer files and internet connection, then refresh.';
+          error.classList.remove('hidden');
+        }
+      }
+    }, 15000);
+  </script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(() => {}));
