@@ -169,7 +169,7 @@ if (viewer) {
 
         const recentlyInteracted = now - lastInteraction < 900;
         if (modelPivot && !interacting && !recentlyInteracted) {
-          modelPivot.rotation.y += delta * 0.28;
+          modelPivot.rotation.y -= delta * 0.28;
         }
 
         controls.update();
