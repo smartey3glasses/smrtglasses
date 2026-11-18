@@ -155,6 +155,11 @@ if (viewer) {
       });
 
       const mesh = new THREE.Mesh(geometry, material);
+
+      // The supplied STL is authored with its height on Z and temple depth on Y.
+      // Reorient it so Z becomes the viewer's vertical Y axis and the front faces
+      // the camera along +Z. This keeps the glasses upright during Y-axis turntable rotation.
+      mesh.rotation.x = -Math.PI / 2;
       mesh.scale.setScalar(2.45 / largestDimension);
 
       modelPivot = new THREE.Group();
