@@ -14,8 +14,6 @@ let alertSearchTimer = null;
 
 const state = {
   events: [],
-  // Keeps Realtime INSERTs idempotent even after older rows leave the visible cache.
-  seenEventIds: new Set(),
   locations: [],
   device: null,
   latestLocation: null,
@@ -404,16 +402,8 @@ async function loadAlerts({ more = false, keep = false } = {}) {
     toast('Alerts could not be loaded. Please try again.');
   } else {
     const rows = data || [];
-    const merged = more ? alertView.items.concat(rows) : rows;
-    const uniqueRows = [];
-    const seenIds = new Set();
-    for (const row of merged) {
-      if (!row?.id || seenIds.has(row.id)) continue;
-      seenIds.add(row.id);
-      state.seenEventIds.add(row.id);
-      uniqueRows.push(row);
-    }
-    alertView.items = uniqueRows;
+    const known = new Set(more ? alertView.items.map(item => item.id) : []);
+    alertView.items = more ? alertView.items.concat(rows.filter(row => !known.has(row.id))) : rows;
     alertView.total = count ?? alertView.items.length;
   }
   renderEvents();
@@ -731,9 +721,6 @@ async function loadData(options = {}) {
       if (!quiet) toast(`Obstacle events could not be loaded: ${eventsResult.error.message}`);
     } else {
       state.events = eventsResult.data || [];
-      for (const event of state.events) {
-        if (event?.id) state.seenEventIds.add(event.id);
-      }
     }
 
     await loadEventCounts(device.id);
@@ -803,29 +790,12 @@ function subscribeToDevice(deviceId) {
       table: 'obstacle_events',
       filter: `device_id=eq.${deviceId}`
     }, payload => {
-      const eventId = payload.new?.id;
-      if (!eventId) return;
-
-      // Realtime can deliver a row already present from the initial fetch
-      // or from a previous notification. Update the cache, but only process
-      // a genuinely new database row once.
-      const alreadyKnown = state.seenEventIds.has(eventId)
-        || state.events.some(event => event.id === eventId)
-        || alertView.items.some(event => event.id === eventId);
-
-      // Mark immediately so repeated notifications cannot race each other.
-      state.seenEventIds.add(eventId);
+      const alreadyKnown = state.events.some(event => event.id === payload.new.id);
       state.events = upsertNewestRecord(state.events, payload.new, 100);
-      if (alreadyKnown) {
-        renderAll();
-        return;
+      if (!alreadyKnown) {
+        if (state.eventCountTotal != null) state.eventCountTotal += 1;
+        if (isToday(recordTime(payload.new)) && state.eventCountToday != null) state.eventCountToday += 1;
       }
-
-      if (state.eventCountTotal != null) state.eventCountTotal += 1;
-      if (isToday(recordTime(payload.new)) && state.eventCountToday != null) {
-        state.eventCountToday += 1;
-      }
-
       renderAll();
       loadAlerts({ keep: true });
       toast('New obstacle detection received.');
