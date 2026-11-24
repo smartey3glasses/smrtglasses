@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+{HEAD}
+<body>
+{GLOBAL_MODALS}
+{LOGIN}
+<div id="appView" class="app-shell hidden">
+{SIDEBAR}
+<main class="main-content">
+{TOPBAR}
+{OVERVIEW}
+{LOCATION}
+{EVENTS}
+{DEVICES}
+{ACCESS}
+</main>
+</div>
+{FAMILY_MODAL}
+{PROFILE_MENU}
+<script src="assets/js/config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script src="assets/js/app.js"></script>
+<script type="module" src="assets/js/glasses-viewer.js?v=18"></script>
+<script>
+window.setTimeout(() => {
+  const loading = document.getElementById('glassesLoading');
+  const error = document.getElementById('glassesError');
+  if (loading && !loading.classList.contains('hidden')) {
+    loading.classList.add('hidden');
+    if (error) {
+      error.textContent = '3D preview could not start. Check the viewer files and internet connection, then refresh.';
+      error.classList.remove('hidden');
+    }
+  }
+}, 15000);
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(() => {}));
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Smart Eyeglasses | Caregiver Dashboard</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link crossorigin="" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet">
+<script src="https://code.iconify.design/iconify-icon/3.0.3/iconify-icon.min.js"></script>
+<link href="assets/css/styles.css" rel="stylesheet">
+<link href="manifest.webmanifest" rel="manifest">
+<meta content="#F3EFE5" name="theme-color"/>
+<meta content="yes" name="mobile-web-app-capable"/>
+<meta content="yes" name="apple-mobile-web-app-capable"/>
+<meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"/>
+<meta content="Smart Eyeglasses" name="apple-mobile-web-app-title"/>
+<link href="assets/images/pwa-icon-192.png" rel="apple-touch-icon"/>
+<script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+      }
+    }
+  </script>
+</link></link></link></head>
+<body>
+<div aria-labelledby="resetFiltersTitle" aria-modal="true" class="confirm-overlay hidden" id="resetFiltersModal" role="dialog">
+<div class="confirm-sheet">
+<h3 id="resetFiltersTitle">Reset filters?</h3>
+<p>This clears your search, urgency, and date range. No alerts are deleted.</p>
+<div class="confirm-actions"><button class="secondary-btn" id="cancelResetFilters" type="button">Cancel</button><button class="primary-btn" id="confirmResetFilters" type="button">Reset filters</button></div>
+</div>
+</div>
+<div aria-labelledby="logoutTitle" aria-modal="true" class="confirm-overlay hidden" id="logoutModal" role="dialog">
+<div class="confirm-sheet">
+<h3 id="logoutTitle">Sign out?</h3>
+<p id="logoutMessage">Are you sure you want to sign out?</p>
+<div class="confirm-actions">
+<button class="secondary-btn" id="cancelLogout">Cancel</button>
+<button class="danger-btn" id="confirmLogout">Sign out</button>
+</div>
+</div>
+</div>
+<div aria-labelledby="resetTitle" aria-modal="true" class="confirm-overlay hidden" id="resetModal" role="dialog">
+<div class="confirm-sheet reset-sheet">
+<h3 id="resetTitle">Reset your password</h3>
+<p id="resetMessage">Enter your account email and we'll send you a password reset link.</p>
+<label class="reset-label" for="resetEmailInput">Email</label>
+<input autocomplete="email" class="reset-input" id="resetEmailInput" placeholder="Enter your email" type="email"/>
+<div class="confirm-actions">
+<button class="secondary-btn" id="cancelReset" type="button">Cancel</button>
+<button class="primary-btn" id="sendReset" type="button">Send reset link</button>
+</div>
+</div>
+</div>
+<div aria-labelledby="updatePasswordTitle" aria-modal="true" class="confirm-overlay hidden" id="updatePasswordModal" role="dialog">
+<div class="confirm-sheet reset-sheet">
+<h3 id="updatePasswordTitle">Choose a new password</h3>
+<p id="updatePasswordMessage">Set a new password for your account.</p>
+<label class="reset-label" for="newPasswordInput">New password</label>
+<div class="password-field reset-password-field">
+<input autocomplete="new-password" class="reset-input" id="newPasswordInput" placeholder="••••••••" type="password"/>
+<button aria-label="Show password" class="password-toggle" id="toggleNewPassword" title="Show password" type="button"><iconify-icon icon="solar:eye-bold-duotone"></iconify-icon></button>
+</div>
+<label class="reset-label" for="confirmPasswordInput">Confirm password</label>
+<div class="password-field reset-password-field">
+<input autocomplete="new-password" class="reset-input" id="confirmPasswordInput" placeholder="••••••••" type="password"/>
+<button aria-label="Show password" class="password-toggle" id="toggleConfirmPassword" title="Show password" type="button"><iconify-icon icon="solar:eye-bold-duotone"></iconify-icon></button>
+</div>
+<div class="confirm-actions">
+<button class="primary-btn" id="saveNewPassword" type="button">Update password</button>
+</div>
+</div>
+</div>
+<div class="toast" id="toast"></div>
+
+<section class="login-view" id="loginView">
+<div class="login-panel">
+<div class="brand-mark logo-mark"><img alt="Smart Eyeglasses" src="assets/images/smart-glasses-logo.svg"/></div>
+<h1>Smart Eyeglasses</h1>
+<p class="login-copy">View the latest location updates and obstacle alerts sent by the smart glasses.</p>
+<form class="login-form" id="loginForm">
+<label>Email<input id="emailInput" placeholder="Enter your email" required="" type="email"/></label>
+<label>Password
+          <span class="password-field">
+<input autocomplete="current-password" id="passwordInput" placeholder="••••••••" required="" type="password"/>
+<button aria-label="Show password" class="password-toggle" id="togglePassword" title="Show password" type="button">
+<iconify-icon icon="solar:eye-bold-duotone"></iconify-icon>
+</button>
+</span>
+</label>
+<button class="forgot-password" id="forgotPasswordBtn" type="button">Forgot password?</button>
+<button class="primary-btn" type="submit">Sign in</button>
+</form>
+<p class="small-note" id="authHint">Sign in to see live data from the glasses.</p>
+</div>
+<div class="login-visual">
+<div class="glasses-showcase">
+<div aria-label="Interactive 3D model of the Smart Eyeglasses" class="glasses-viewer" id="glassesViewer">
+<div class="glasses-loading" id="glassesLoading">
+<span aria-hidden="true" class="glasses-loading-mark"></span>
+<span>Loading device model…</span>
+</div>
+<div class="glasses-error hidden" id="glassesError" role="status">
+            The 3D model could not be loaded. Please refresh the page.
+          </div>
+</div>
+</div>
+</div>
+</section>
+
+<div id="appView" class="app-shell hidden">
+<aside class="sidebar">
+<div class="sidebar-brand"><div class="brand-mark small logo-mark"><img alt="Smart Eyeglasses" src="assets/images/smart-glasses-logo.svg"/></div><div><b>Smart Eyeglasses</b><span>Caregiver dashboard</span></div></div>
+<nav>
+<button class="nav-item active" data-section="overview"><span><iconify-icon icon="solar:home-bold-duotone"></iconify-icon></span> Overview</button>
+<button class="nav-item" data-section="location"><span><iconify-icon icon="solar:map-point-bold-duotone"></iconify-icon></span> Location</button>
+<button class="nav-item" data-section="events"><span><iconify-icon icon="solar:danger-triangle-bold-duotone"></iconify-icon></span> Obstacle alerts</button>
+<button class="nav-item" data-section="devices"><span><iconify-icon icon="solar:glasses-bold-duotone"></iconify-icon></span> Smart Glasses</button>
+</nav>
+<nav>
+<button class="nav-item" data-section="access"><span><iconify-icon icon="solar:users-group-rounded-bold-duotone"></iconify-icon></span> Shared access</button>
+</nav>
+<div class="sidebar-bottom">
+<div class="connection-card"><span class="status-dot"></span><div><b id="connectionLabel">Live data</b><small id="connectionSub">Connected</small></div></div>
+<button class="logout-btn" id="logoutBtn"><iconify-icon icon="solar:logout-2-bold-duotone"></iconify-icon> Sign out</button>
+</div>
+</aside>
+
+<main class="main-content">
+<header class="topbar">
+<div><h2 id="pageTitle">Home</h2></div>
+<div class="top-actions"><span id="lastSync">Updated just now</span><button class="icon-btn" id="refreshBtn" title="Refresh"><iconify-icon icon="solar:refresh-bold-duotone"></iconify-icon></button><button aria-label="Profile" class="avatar" id="profileBtn" title="Profile"><iconify-icon icon="solar:user-bold-duotone"></iconify-icon></button></div>
+</header>
+
+<section class="page-section active-section" id="overview">
+<div class="hero-row caregiver-hero">
+<div><h3>Hi, <span id="userName">Caregiver</span></h3></div>
+<div class="person-status"><span class="status-dot"></span><div><b id="relativeName">Smart Glasses</b><small id="relativeStatus">offline · no telemetry</small></div></div>
+</div>
+<div class="care-stats">
+<button class="care-card" data-section-jump="location"><div class="stat-icon blue"><iconify-icon icon="solar:map-point-bold-duotone"></iconify-icon></div><span>Last reported location</span><strong id="locationAvailability">Waiting</strong><small id="locationMeta">No telemetry received</small></button>
+<button class="care-card" data-section-jump="events"><div class="stat-icon red"><iconify-icon icon="solar:danger-triangle-bold-duotone"></iconify-icon></div><span>Obstacle alerts today</span><strong id="todayEvents">0</strong><small id="eventTrend">No alerts recorded</small></button>
+<button class="care-card" data-section-jump="devices"><div class="stat-icon green"><iconify-icon icon="solar:shield-check-bold-duotone"></iconify-icon></div><span>Smart glasses</span><strong id="deviceStatus">offline</strong><small id="deviceStatusMeta">No telemetry received</small></button>
+</div>
+<div class="content-grid two-col home-grid">
+<div class="panel"><div class="panel-head"><div><h4>Last reported location</h4></div><button class="text-btn" data-section-jump="location">Open map</button></div><div class="location-snapshot"><div class="mini-map" id="miniMap"></div><div class="map-caption"><div><span>Last update</span><b id="miniLocationTime">Just now</b></div><button class="secondary-btn" id="homeMapsBtn">Open in Maps</button></div></div></div>
+<div class="panel"><div class="panel-head"><div><h4>Recent alerts</h4></div><button class="text-btn" data-section-jump="events">View all</button></div><div class="event-list" id="recentEvents"></div></div>
+</div>
+</section>
+
+<section class="page-section" id="location">
+<div class="section-heading"><p>The latest position reported by the glasses.</p></div>
+<div class="location-grid"><div class="panel map-panel"><div class="main-map" id="mainMap"></div></div><div class="panel location-detail"><h4 id="locationTime">No update</h4><div class="location-friendly"><iconify-icon icon="solar:map-point-wave-bold-duotone"></iconify-icon><div><strong>Latest location report</strong><span id="locationSummary">The map shows the most recent position received from the device.</span></div></div><div class="detail-list"><div><span>Last update</span><b id="locationUpdated">Just now</b></div><div><span>Device</span><b id="locationDevice">Smart Glasses</b></div></div><button class="primary-btn full" id="openMapsBtn">Open in Google Maps</button><button class="link-btn" id="showCoordinatesBtn">Show exact coordinates</button><div class="coordinates-box hidden" id="coordinatesBox"><span>Latitude</span><b id="detailLat">No location</b><span>Longitude</span><b id="detailLng">No location</b></div></div></div>
+<div class="panel history-panel"><div class="panel-head"><div><h4>Location history</h4></div></div><div class="table-wrap" id="locationHistory"></div></div>
+</section>
+
+<section class="page-section" id="events">
+<div class="section-heading"><p>Obstacle events recorded by the smart glasses and sent to this dashboard.</p></div>
+<div class="alert-summary"><div><span>Detections today</span><strong id="alertsTodayCount">—</strong></div><div><span>All-time detections</span><strong id="alertsTotal">—</strong></div><div><span>Latest detection</span><strong id="latestAlertText">None</strong></div></div>
+<div class="filter-row"><input class="search-input" id="eventSearch" placeholder="Search alerts…"/><div class="custom-select" id="severityPicker"><button aria-expanded="false" aria-haspopup="listbox" class="custom-select-trigger" id="severityPickerTrigger" type="button"><span id="severityPickerLabel">All alerts</span><iconify-icon icon="solar:alt-arrow-down-bold-duotone"></iconify-icon></button><div aria-label="Alert severity" class="custom-select-menu" id="severityPickerMenu" role="listbox"><button aria-selected="true" class="custom-option active" data-value="all" role="option" type="button"><span>All alerts</span><iconify-icon icon="solar:check-circle-bold-duotone"></iconify-icon></button><button aria-selected="false" class="custom-option" data-value="High" role="option" type="button"><span>More urgent</span><iconify-icon icon="solar:check-circle-bold-duotone"></iconify-icon></button><button aria-selected="false" class="custom-option" data-value="Medium" role="option" type="button"><span>Moderate</span><iconify-icon icon="solar:check-circle-bold-duotone"></iconify-icon></button><button aria-selected="false" class="custom-option" data-value="Low" role="option" type="button"><span>Less urgent</span><iconify-icon icon="solar:check-circle-bold-duotone"></iconify-icon></button></div><input id="severityFilter" type="hidden" value="all"/></div><div class="custom-select" id="rangePicker"><button aria-expanded="false" aria-haspopup="listbox" class="custom-select-trigger" id="rangePickerTrigger" type="button"><span id="rangePickerLabel">All time</span><iconify-icon icon="solar:alt-arrow-down-bold-duotone"></iconify-icon></button><div aria-label="Date range" class="custom-select-menu" id="rangePickerMenu" role="listbox"><button aria-selected="true" class="custom-option active" data-value="all" role="option" type="button"><span>All time</span><iconify-icon icon="solar:check-circle-bold-duotone"></iconify-icon></button><button aria-selected="false" class="custom-option" data-value="1" role="option" type="button"><span>Last 24 hours</span><iconify-icon icon="solar:check-circle-bold-duotone"></iconify-icon></button><button aria-selected="false" class="custom-option" data-value="7" role="option" type="button"><span>Last 7 days</span><iconify-icon icon="solar:check-circle-bold-duotone"></iconify-icon></button><button aria-selected="false" class="custom-option" data-value="30" role="option" type="button"><span>Last 30 days</span><iconify-icon icon="solar:check-circle-bold-duotone"></iconify-icon></button><button aria-selected="false" class="custom-option" data-value="90" role="option" type="button"><span>Last 90 days</span><iconify-icon icon="solar:check-circle-bold-duotone"></iconify-icon></button></div><input id="rangeFilter" type="hidden" value="all"/></div><button class="secondary-btn" id="clearFilterBtn" type="button">Reset</button></div>
+<div class="panel table-panel"><div class="table-wrap" id="eventsTable"></div><div class="load-more"><span id="alertsShown"></span><button class="secondary-btn hidden" id="loadMoreBtn" type="button">Show more</button></div></div>
+</section>
+
+<section class="page-section" id="devices">
+<div class="section-heading"><p>Device connection status and registered hardware components.</p></div>
+<div class="device-grid" id="deviceCards"></div>
+<div class="panel technical-panel"><div class="panel-head"><div><h4>Device details</h4></div><button class="text-btn" id="technicalToggle">Hide details</button></div><div class="technical-details" id="technicalDetails"><div><span>Controller</span><b>ESP32 DevKit V1</b></div><div><span>Obstacle sensors</span><b>VL53L0X obstacle sensors</b></div><div><span>Location</span><b>NEO-6M GPS</b></div><div><span>Audio</span><b>VV4 bone-conduction headset</b></div><div><span>Connection</span><b id="technicalConnection">Connected</b></div></div></div>
+</section>
+
+<section class="page-section" id="access">
+<div class="section-heading"><p>Manage who can view this device’s location reports and obstacle alerts.</p><button class="primary-btn compact" id="addAccessBtn"><iconify-icon icon="solar:user-plus-bold-duotone"></iconify-icon> Add family member</button></div>
+<div class="panel"><div class="access-summary"><div><span>People with access</span><strong id="accessCount">0</strong></div><div><span>Shared information</span><strong>Location reports &amp; alerts</strong></div><div><span>Device</span><strong id="accessDeviceName">Smart Glasses</strong></div></div><div class="table-wrap" id="accessTable"></div></div>
+</section>
+
+</main>
+</div>
+<div aria-labelledby="familyAccessTitle" aria-modal="true" class="modal-overlay hidden" id="familyAccessModal" role="dialog">
+<div class="form-modal">
+<div class="form-modal-head"><div><h3 id="familyAccessTitle">Add family member</h3></div><button aria-label="Close" class="icon-btn modal-close" id="closeFamilyAccess" type="button"><iconify-icon icon="solar:close-circle-bold-duotone"></iconify-icon></button></div>
+<p class="form-modal-copy">They will be able to view this device’s location reports and obstacle alerts.</p>
+<label class="modal-field-label" for="familyEmailInput">Email address</label>
+<input autocomplete="email" class="modal-input" id="familyEmailInput" placeholder="name@example.com" type="email"/>
+<div class="modal-actions"><button class="secondary-btn" id="cancelFamilyAccess" type="button">Cancel</button><button class="primary-btn" id="confirmFamilyAccess" type="button">Add member</button></div>
+</div>
+</div>
+
+<div aria-label="Profile menu" class="profile-menu hidden" id="profileMenu" role="dialog">
+<div class="profile-card-head">
+<div class="profile-avatar"><iconify-icon icon="solar:user-bold-duotone"></iconify-icon></div>
+<div><b id="profileName">Caregiver</b><small id="profileEmail">Enter your email</small></div>
+</div>
+<div class="profile-divider"></div>
+<button class="profile-action hidden" id="installBtn"><iconify-icon icon="solar:download-minimalistic-bold-duotone"></iconify-icon><span>Install app</span><iconify-icon class="chev" icon="solar:alt-arrow-right-bold-duotone"></iconify-icon></button>
+<div class="profile-theme-row">
+<div class="profile-theme-label"><iconify-icon icon="solar:sun-2-bold-duotone"></iconify-icon><span>Appearance</span></div>
+<div aria-label="Theme" class="segmented theme-control" id="themeControl">
+<button aria-label="Light mode" aria-pressed="true" data-theme="light" title="Light mode" type="button"><iconify-icon icon="solar:sun-2-bold-duotone"></iconify-icon></button>
+<button aria-label="Dark mode" aria-pressed="false" data-theme="dark" title="Dark mode" type="button"><iconify-icon icon="solar:moon-bold-duotone"></iconify-icon></button>
+</div>
+</div>
+<div class="profile-divider profile-divider-bottom"></div>
+<button class="profile-action danger" id="profileLogoutBtn"><iconify-icon icon="solar:logout-2-bold-duotone"></iconify-icon><span>Sign out</span></button>
+</div>
+
+<script src="assets/js/config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script src="assets/js/app.js"></script>
+<script type="module" src="assets/js/glasses-viewer.js?v=18"></script>
+<script>
+window.setTimeout(() => {
+  const loading = document.getElementById('glassesLoading');
+  const error = document.getElementById('glassesError');
+  if (loading && !loading.classList.contains('hidden')) {
+    loading.classList.add('hidden');
+    if (error) {
+      error.textContent = '3D preview could not start. Check the viewer files and internet connection, then refresh.';
+      error.classList.remove('hidden');
+    }
+  }
+}, 15000);
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(() => {}));
+}
+</script>
+</body>
+</html>

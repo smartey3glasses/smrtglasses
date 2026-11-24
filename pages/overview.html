@@ -1,0 +1,15 @@
+<section class="page-section active-section" id="overview">
+<div class="hero-row caregiver-hero">
+<div><h3>Hi, <span id="userName">Caregiver</span></h3></div>
+<div class="person-status"><span class="status-dot"></span><div><b id="relativeName">Smart Glasses</b><small id="relativeStatus">offline · no telemetry</small></div></div>
+</div>
+<div class="care-stats">
+<button class="care-card" data-section-jump="location"><div class="stat-icon blue"><iconify-icon icon="solar:map-point-bold-duotone"></iconify-icon></div><span>Last reported location</span><strong id="locationAvailability">Waiting</strong><small id="locationMeta">No telemetry received</small></button>
+<button class="care-card" data-section-jump="events"><div class="stat-icon red"><iconify-icon icon="solar:danger-triangle-bold-duotone"></iconify-icon></div><span>Obstacle alerts today</span><strong id="todayEvents">0</strong><small id="eventTrend">No alerts recorded</small></button>
+<button class="care-card" data-section-jump="devices"><div class="stat-icon green"><iconify-icon icon="solar:shield-check-bold-duotone"></iconify-icon></div><span>Smart glasses</span><strong id="deviceStatus">offline</strong><small id="deviceStatusMeta">No telemetry received</small></button>
+</div>
+<div class="content-grid two-col home-grid">
+<div class="panel"><div class="panel-head"><div><h4>Last reported location</h4></div><button class="text-btn" data-section-jump="location">Open map</button></div><div class="location-snapshot"><div class="mini-map" id="miniMap"></div><div class="map-caption"><div><span>Last update</span><b id="miniLocationTime">Just now</b></div><button class="secondary-btn" id="homeMapsBtn">Open in Maps</button></div></div></div>
+<div class="panel"><div class="panel-head"><div><h4>Recent alerts</h4></div><button class="text-btn" data-section-jump="events">View all</button></div><div class="event-list" id="recentEvents"></div></div>
+</div>
+</section>

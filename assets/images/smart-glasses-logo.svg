@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 96" role="img" aria-label="Smart Eyeglasses">
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M58 14a30 30 0 0 1 44 0" stroke="#2679a6" stroke-width="6"/>
+    <path d="M68 24a16 16 0 0 1 24 0" stroke="#17785a" stroke-width="6"/>
+    <rect x="12" y="38" width="55" height="42" rx="14" fill="#e4f2f8" stroke="#10303a" stroke-width="7"/>
+    <rect x="93" y="38" width="55" height="42" rx="14" fill="#e4f2f8" stroke="#10303a" stroke-width="7"/>
+    <path d="M67 54c4-6 22-6 26 0" stroke="#10303a" stroke-width="7"/>
+    <circle cx="39.5" cy="59" r="6" fill="#17785a" stroke="none"/>
+    <circle cx="120.5" cy="59" r="6" fill="#17785a" stroke="none"/>
+  </g>
+</svg>

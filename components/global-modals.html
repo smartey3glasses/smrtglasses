@@ -1,0 +1,49 @@
+<div aria-labelledby="resetFiltersTitle" aria-modal="true" class="confirm-overlay hidden" id="resetFiltersModal" role="dialog">
+<div class="confirm-sheet">
+<h3 id="resetFiltersTitle">Reset filters?</h3>
+<p>This clears your search, urgency, and date range. No alerts are deleted.</p>
+<div class="confirm-actions"><button class="secondary-btn" id="cancelResetFilters" type="button">Cancel</button><button class="primary-btn" id="confirmResetFilters" type="button">Reset filters</button></div>
+</div>
+</div>
+<div aria-labelledby="logoutTitle" aria-modal="true" class="confirm-overlay hidden" id="logoutModal" role="dialog">
+<div class="confirm-sheet">
+<h3 id="logoutTitle">Sign out?</h3>
+<p id="logoutMessage">Are you sure you want to sign out?</p>
+<div class="confirm-actions">
+<button class="secondary-btn" id="cancelLogout">Cancel</button>
+<button class="danger-btn" id="confirmLogout">Sign out</button>
+</div>
+</div>
+</div>
+<div aria-labelledby="resetTitle" aria-modal="true" class="confirm-overlay hidden" id="resetModal" role="dialog">
+<div class="confirm-sheet reset-sheet">
+<h3 id="resetTitle">Reset your password</h3>
+<p id="resetMessage">Enter your account email and we'll send you a password reset link.</p>
+<label class="reset-label" for="resetEmailInput">Email</label>
+<input autocomplete="email" class="reset-input" id="resetEmailInput" placeholder="Enter your email" type="email"/>
+<div class="confirm-actions">
+<button class="secondary-btn" id="cancelReset" type="button">Cancel</button>
+<button class="primary-btn" id="sendReset" type="button">Send reset link</button>
+</div>
+</div>
+</div>
+<div aria-labelledby="updatePasswordTitle" aria-modal="true" class="confirm-overlay hidden" id="updatePasswordModal" role="dialog">
+<div class="confirm-sheet reset-sheet">
+<h3 id="updatePasswordTitle">Choose a new password</h3>
+<p id="updatePasswordMessage">Set a new password for your account.</p>
+<label class="reset-label" for="newPasswordInput">New password</label>
+<div class="password-field reset-password-field">
+<input autocomplete="new-password" class="reset-input" id="newPasswordInput" placeholder="••••••••" type="password"/>
+<button aria-label="Show password" class="password-toggle" id="toggleNewPassword" title="Show password" type="button"><iconify-icon icon="solar:eye-bold-duotone"></iconify-icon></button>
+</div>
+<label class="reset-label" for="confirmPasswordInput">Confirm password</label>
+<div class="password-field reset-password-field">
+<input autocomplete="new-password" class="reset-input" id="confirmPasswordInput" placeholder="••••••••" type="password"/>
+<button aria-label="Show password" class="password-toggle" id="toggleConfirmPassword" title="Show password" type="button"><iconify-icon icon="solar:eye-bold-duotone"></iconify-icon></button>
+</div>
+<div class="confirm-actions">
+<button class="primary-btn" id="saveNewPassword" type="button">Update password</button>
+</div>
+</div>
+</div>
+<div class="toast" id="toast"></div>

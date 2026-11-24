@@ -1,0 +1,34 @@
+<section class="login-view" id="loginView">
+<div class="login-panel">
+<div class="brand-mark logo-mark"><img alt="Smart Eyeglasses" src="assets/images/smart-glasses-logo.svg"/></div>
+<h1>Smart Eyeglasses</h1>
+<p class="login-copy">View the latest location updates and obstacle alerts sent by the smart glasses.</p>
+<form class="login-form" id="loginForm">
+<label>Email<input id="emailInput" placeholder="Enter your email" required="" type="email"/></label>
+<label>Password
+          <span class="password-field">
+<input autocomplete="current-password" id="passwordInput" placeholder="••••••••" required="" type="password"/>
+<button aria-label="Show password" class="password-toggle" id="togglePassword" title="Show password" type="button">
+<iconify-icon icon="solar:eye-bold-duotone"></iconify-icon>
+</button>
+</span>
+</label>
+<button class="forgot-password" id="forgotPasswordBtn" type="button">Forgot password?</button>
+<button class="primary-btn" type="submit">Sign in</button>
+</form>
+<p class="small-note" id="authHint">Sign in to see live data from the glasses.</p>
+</div>
+<div class="login-visual">
+<div class="glasses-showcase">
+<div aria-label="Interactive 3D model of the Smart Eyeglasses" class="glasses-viewer" id="glassesViewer">
+<div class="glasses-loading" id="glassesLoading">
+<span aria-hidden="true" class="glasses-loading-mark"></span>
+<span>Loading device model…</span>
+</div>
+<div class="glasses-error hidden" id="glassesError" role="status">
+            The 3D model could not be loaded. Please refresh the page.
+          </div>
+</div>
+</div>
+</div>
+</section>
