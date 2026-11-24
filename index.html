@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Smart Eyeglasses Dashboard</title>
+  <title>Smart Eyeglasses | Caregiver Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
@@ -11,7 +11,7 @@
   <script src="https://code.iconify.design/iconify-icon/3.0.3/iconify-icon.min.js"></script>
   <link rel="stylesheet" href="styles.css" />
   <link rel="manifest" href="manifest.webmanifest" />
-  <meta name="theme-color" content="#e4f2f8" />
+  <meta name="theme-color" content="#F3EFE5" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -85,7 +85,7 @@
     <div class="login-panel">
       <div class="brand-mark logo-mark"><img src="smart-glasses-logo.svg" alt="Smart Eyeglasses" /></div>
       <h1>Smart Eyeglasses</h1>
-      <p class="login-copy">Check where your relative is and what the glasses have detected.</p>
+      <p class="login-copy">View the latest location updates and obstacle alerts sent by the smart glasses.</p>
       <form id="loginForm" class="login-form">
         <label>Email<input id="emailInput" type="email" placeholder="Enter your email" required /></label>
         <label>Password
@@ -118,15 +118,15 @@
 
   <div id="appView" class="app-shell hidden">
     <aside class="sidebar">
-      <div class="sidebar-brand"><div class="brand-mark small logo-mark"><img src="smart-glasses-logo.svg" alt="Smart Eyeglasses" /></div><div><b>Smart Eyeglasses</b><span>Caregiver</span></div></div>
+      <div class="sidebar-brand"><div class="brand-mark small logo-mark"><img src="smart-glasses-logo.svg" alt="Smart Eyeglasses" /></div><div><b>Smart Eyeglasses</b><span>Caregiver dashboard</span></div></div>
       <nav>
-        <button class="nav-item active" data-section="overview"><span><iconify-icon icon="solar:home-2-linear"></iconify-icon></span> Home</button>
+        <button class="nav-item active" data-section="overview"><span><iconify-icon icon="solar:home-2-linear"></iconify-icon></span> Overview</button>
         <button class="nav-item" data-section="location"><span><iconify-icon icon="solar:map-point-linear"></iconify-icon></span> Location</button>
-        <button class="nav-item" data-section="events"><span><iconify-icon icon="solar:danger-triangle-linear"></iconify-icon></span> Alerts</button>
+        <button class="nav-item" data-section="events"><span><iconify-icon icon="solar:danger-triangle-linear"></iconify-icon></span> Obstacle alerts</button>
         <button class="nav-item" data-section="devices"><span><iconify-icon icon="solar:glasses-linear"></iconify-icon></span> Smart Glasses</button>
       </nav>
       <nav>
-        <button class="nav-item" data-section="access"><span><iconify-icon icon="solar:users-group-rounded-linear"></iconify-icon></span> Family Access</button>
+        <button class="nav-item" data-section="access"><span><iconify-icon icon="solar:users-group-rounded-linear"></iconify-icon></span> Shared access</button>
       </nav>
       <div class="sidebar-bottom">
         <div class="connection-card"><span class="status-dot"></span><div><b id="connectionLabel">Live data</b><small id="connectionSub">Connected</small></div></div>
@@ -147,39 +147,39 @@
         </div>
 
         <div class="care-stats">
-          <button class="care-card" data-section-jump="location"><div class="stat-icon blue"><iconify-icon icon="solar:map-point-linear"></iconify-icon></div><span>Current location</span><strong id="locationAvailability">Waiting</strong><small id="locationMeta">No telemetry received</small></button>
-          <button class="care-card" data-section-jump="events"><div class="stat-icon red"><iconify-icon icon="solar:danger-triangle-linear"></iconify-icon></div><span>Alerts today</span><strong id="todayEvents">0</strong><small id="eventTrend">No alerts recorded</small></button>
+          <button class="care-card" data-section-jump="location"><div class="stat-icon blue"><iconify-icon icon="solar:map-point-linear"></iconify-icon></div><span>Last reported location</span><strong id="locationAvailability">Waiting</strong><small id="locationMeta">No telemetry received</small></button>
+          <button class="care-card" data-section-jump="events"><div class="stat-icon red"><iconify-icon icon="solar:danger-triangle-linear"></iconify-icon></div><span>Obstacle alerts today</span><strong id="todayEvents">0</strong><small id="eventTrend">No alerts recorded</small></button>
           <button class="care-card" data-section-jump="devices"><div class="stat-icon green"><iconify-icon icon="solar:shield-check-linear"></iconify-icon></div><span>Smart glasses</span><strong id="deviceStatus">offline</strong><small id="deviceStatusMeta">No telemetry received</small></button>
         </div>
 
         <div class="content-grid two-col home-grid">
-          <div class="panel"><div class="panel-head"><div><h4>Current location</h4></div><button class="text-btn" data-section-jump="location">Open map</button></div><div class="location-snapshot"><div id="miniMap" class="mini-map"></div><div class="map-caption"><div><span>Last update</span><b id="miniLocationTime">Just now</b></div><button id="homeMapsBtn" class="secondary-btn">Open in Maps</button></div></div></div>
+          <div class="panel"><div class="panel-head"><div><h4>Last reported location</h4></div><button class="text-btn" data-section-jump="location">Open map</button></div><div class="location-snapshot"><div id="miniMap" class="mini-map"></div><div class="map-caption"><div><span>Last update</span><b id="miniLocationTime">Just now</b></div><button id="homeMapsBtn" class="secondary-btn">Open in Maps</button></div></div></div>
           <div class="panel"><div class="panel-head"><div><h4>Recent alerts</h4></div><button class="text-btn" data-section-jump="events">View all</button></div><div id="recentEvents" class="event-list"></div></div>
         </div>
       </section>
 
       <section id="location" class="page-section">
         <div class="section-heading"><p>The latest position reported by the glasses.</p></div>
-        <div class="location-grid"><div class="panel map-panel"><div id="mainMap" class="main-map"></div></div><div class="panel location-detail"><h4 id="locationTime">No update</h4><div class="location-friendly"><iconify-icon icon="solar:map-point-wave-linear"></iconify-icon><div><strong>Current location is available</strong><span id="locationSummary">The glasses recently reported a position.</span></div></div><div class="detail-list"><div><span>Last update</span><b id="locationUpdated">Just now</b></div><div><span>Device</span><b id="locationDevice">Smart Glasses</b></div></div><button id="openMapsBtn" class="primary-btn full">Open in Google Maps</button><button id="showCoordinatesBtn" class="link-btn">Show exact coordinates</button><div id="coordinatesBox" class="coordinates-box hidden"><span>Latitude</span><b id="detailLat">No location</b><span>Longitude</span><b id="detailLng">No location</b></div></div></div>
+        <div class="location-grid"><div class="panel map-panel"><div id="mainMap" class="main-map"></div></div><div class="panel location-detail"><h4 id="locationTime">No update</h4><div class="location-friendly"><iconify-icon icon="solar:map-point-wave-linear"></iconify-icon><div><strong>Latest location report</strong><span id="locationSummary">The map shows the most recent position received from the device.</span></div></div><div class="detail-list"><div><span>Last update</span><b id="locationUpdated">Just now</b></div><div><span>Device</span><b id="locationDevice">Smart Glasses</b></div></div><button id="openMapsBtn" class="primary-btn full">Open in Google Maps</button><button id="showCoordinatesBtn" class="link-btn">Show exact coordinates</button><div id="coordinatesBox" class="coordinates-box hidden"><span>Latitude</span><b id="detailLat">No location</b><span>Longitude</span><b id="detailLng">No location</b></div></div></div>
         <div class="panel history-panel"><div class="panel-head"><div><h4>Location history</h4></div></div><div id="locationHistory" class="table-wrap"></div></div>
       </section>
 
       <section id="events" class="page-section">
-        <div class="section-heading"><p>Obstacles the glasses detected while your relative was walking.</p></div>
+        <div class="section-heading"><p>Obstacle events recorded by the smart glasses and sent to this dashboard.</p></div>
         <div class="alert-summary"><div><span>Detections today</span><strong id="alertsTodayCount">—</strong></div><div><span>All-time detections</span><strong id="alertsTotal">—</strong></div><div><span>Latest detection</span><strong id="latestAlertText">None</strong></div></div>
         <div class="filter-row"><input id="eventSearch" class="search-input" placeholder="Search alerts…" /><div class="custom-select" id="severityPicker"><button class="custom-select-trigger" id="severityPickerTrigger" type="button" aria-haspopup="listbox" aria-expanded="false"><span id="severityPickerLabel">All alerts</span><iconify-icon icon="solar:alt-arrow-down-linear"></iconify-icon></button><div class="custom-select-menu" id="severityPickerMenu" role="listbox" aria-label="Alert severity"><button type="button" class="custom-option active" data-value="all" role="option" aria-selected="true"><span>All alerts</span><iconify-icon icon="solar:check-circle-linear"></iconify-icon></button><button type="button" class="custom-option" data-value="High" role="option" aria-selected="false"><span>More urgent</span><iconify-icon icon="solar:check-circle-linear"></iconify-icon></button><button type="button" class="custom-option" data-value="Medium" role="option" aria-selected="false"><span>Moderate</span><iconify-icon icon="solar:check-circle-linear"></iconify-icon></button><button type="button" class="custom-option" data-value="Low" role="option" aria-selected="false"><span>Less urgent</span><iconify-icon icon="solar:check-circle-linear"></iconify-icon></button></div><input type="hidden" id="severityFilter" value="all" /></div><div class="custom-select" id="rangePicker"><button class="custom-select-trigger" id="rangePickerTrigger" type="button" aria-haspopup="listbox" aria-expanded="false"><span id="rangePickerLabel">All time</span><iconify-icon icon="solar:alt-arrow-down-linear"></iconify-icon></button><div class="custom-select-menu" id="rangePickerMenu" role="listbox" aria-label="Date range"><button type="button" class="custom-option active" data-value="all" role="option" aria-selected="true"><span>All time</span><iconify-icon icon="solar:check-circle-linear"></iconify-icon></button><button type="button" class="custom-option" data-value="1" role="option" aria-selected="false"><span>Last 24 hours</span><iconify-icon icon="solar:check-circle-linear"></iconify-icon></button><button type="button" class="custom-option" data-value="7" role="option" aria-selected="false"><span>Last 7 days</span><iconify-icon icon="solar:check-circle-linear"></iconify-icon></button><button type="button" class="custom-option" data-value="30" role="option" aria-selected="false"><span>Last 30 days</span><iconify-icon icon="solar:check-circle-linear"></iconify-icon></button><button type="button" class="custom-option" data-value="90" role="option" aria-selected="false"><span>Last 90 days</span><iconify-icon icon="solar:check-circle-linear"></iconify-icon></button></div><input type="hidden" id="rangeFilter" value="all" /></div><button id="clearFilterBtn" class="secondary-btn" type="button">Reset</button></div>
         <div class="panel table-panel"><div id="eventsTable" class="table-wrap"></div><div class="load-more"><span id="alertsShown"></span><button id="loadMoreBtn" class="secondary-btn hidden" type="button">Show more</button></div></div>
       </section>
 
       <section id="devices" class="page-section">
-        <div class="section-heading"><p>Connection status and device details.</p></div>
+        <div class="section-heading"><p>Device connection status and registered hardware components.</p></div>
         <div id="deviceCards" class="device-grid"></div>
         <div class="panel technical-panel"><div class="panel-head"><div><h4>Device details</h4></div><button id="technicalToggle" class="text-btn">Hide details</button></div><div id="technicalDetails" class="technical-details"><div><span>Controller</span><b>ESP32 DevKit V1</b></div><div><span>Obstacle sensors</span><b>VL53L0X obstacle sensors</b></div><div><span>Location</span><b>NEO-6M GPS</b></div><div><span>Audio</span><b>VV4 bone-conduction headset</b></div><div><span>Connection</span><b id="technicalConnection">Connected</b></div></div></div>
       </section>
 
       <section id="access" class="page-section">
-        <div class="section-heading"><p>People who can see the location and alerts.</p><button class="primary-btn compact" id="addAccessBtn"><iconify-icon icon="solar:user-plus-linear"></iconify-icon> Add family member</button></div>
-        <div class="panel"><div class="access-summary"><div><span>People with access</span><strong id="accessCount">0</strong></div><div><span>What they can see</span><strong>Location & alerts</strong></div><div><span>Device</span><strong id="accessDeviceName">Smart Glasses</strong></div></div><div id="accessTable" class="table-wrap"></div></div>
+        <div class="section-heading"><p>Manage who can view this device’s location reports and obstacle alerts.</p><button class="primary-btn compact" id="addAccessBtn"><iconify-icon icon="solar:user-plus-linear"></iconify-icon> Add family member</button></div>
+        <div class="panel"><div class="access-summary"><div><span>People with access</span><strong id="accessCount">0</strong></div><div><span>Shared information</span><strong>Location reports & alerts</strong></div><div><span>Device</span><strong id="accessDeviceName">Smart Glasses</strong></div></div><div id="accessTable" class="table-wrap"></div></div>
       </section>
     </main>
   </div>
@@ -187,7 +187,7 @@
   <div id="familyAccessModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="familyAccessTitle">
     <div class="form-modal">
       <div class="form-modal-head"><div><h3 id="familyAccessTitle">Add family member</h3></div><button id="closeFamilyAccess" class="icon-btn modal-close" type="button" aria-label="Close"><iconify-icon icon="solar:close-circle-linear"></iconify-icon></button></div>
-      <p class="form-modal-copy">They will be able to see the location and alerts.</p>
+      <p class="form-modal-copy">They will be able to view this device’s location reports and obstacle alerts.</p>
       <label class="modal-field-label" for="familyEmailInput">Email address</label>
       <input id="familyEmailInput" class="modal-input" type="email" autocomplete="email" placeholder="name@example.com" />
       <div class="modal-actions"><button id="cancelFamilyAccess" class="secondary-btn" type="button">Cancel</button><button id="confirmFamilyAccess" class="primary-btn" type="button">Add member</button></div>

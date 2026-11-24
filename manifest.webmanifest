@@ -1,13 +1,13 @@
 {
   "name": "Smart Eyeglasses | Caregiver Dashboard",
   "short_name": "Smart Eyeglasses",
-  "description": "Caregiver dashboard for Smart Eyeglasses location and obstacle monitoring.",
+  "description": "Caregiver dashboard for location reports and obstacle alerts from Smart Eyeglasses.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "background_color": "#f1f8fb",
-  "theme_color": "#e4f2f8",
+  "background_color": "#F3EFE5",
+  "theme_color": "#F3EFE5",
   "icons": [
     {
       "src": "pwa-icon-192.png",

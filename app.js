@@ -392,7 +392,7 @@ async function loadAlerts({ more = false, keep = false } = {}) {
     .order('timestamp', { ascending: false })
     .range(offset, offset + size - 1);
 
-  if (requestId !== alertView.requestId) return; // a newer request replaced this one
+  if (requestId !== alertView.requestId) return;
 
   alertView.loading = false;
   if (error) {
@@ -634,8 +634,6 @@ async function loadData(options = {}) {
       }
     }
 
-    // Last-resort discovery is still protected by the user's Supabase RLS policies.
-    // It helps when telemetry is readable but the device_access list is not.
     if (!accessibleDevices.length) {
       const [recentEventResult, recentLocationResult] = await Promise.all([
         supabaseClient
@@ -1075,7 +1073,7 @@ async function refreshAll() {
   await loadData();
   button.disabled = false;
   button.classList.remove('spinning');
-  if ($('appView').classList.contains('hidden')) return; // session ended during refresh
+  if ($('appView').classList.contains('hidden')) return;
   toast(loadFailed ? 'Could not refresh. Check your connection and try again.' : 'Information refreshed.');
 }
 

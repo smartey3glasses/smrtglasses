@@ -33,7 +33,6 @@ if (viewer) {
 
   async function initialize() {
     try {
-      // Use the import map in index.html. Errors are caught and shown in the viewer.
       const THREE = await import('three');
       const [{ STLLoader }, { OrbitControls }] = await Promise.all([
         import('three/addons/loaders/STLLoader.js'),
@@ -105,7 +104,6 @@ if (viewer) {
         lastInteraction = performance.now();
       });
 
-      // Fetch with an explicit path and status check; this catches missing Vercel assets.
       const modelPath = new URL('./assets/models/base.stl', document.baseURI);
       const response = await fetch(modelPath.href, { cache: 'no-store' });
       if (!response.ok) {
@@ -147,9 +145,6 @@ if (viewer) {
 
       const mesh = new THREE.Mesh(geometry, material);
 
-      // The supplied STL is authored with its height on Z and temple depth on Y.
-      // Reorient it so Z becomes the viewer's vertical Y axis and the front faces
-      // the camera along +Z. This keeps the glasses upright during Y-axis turntable rotation.
       mesh.rotation.x = -Math.PI / 2;
       mesh.scale.setScalar(2.45 / largestDimension);
 

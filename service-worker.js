@@ -15,7 +15,6 @@ const APP_SHELL = [
 ];
 
 self.addEventListener('install', event => {
-  // Install the shell even if an optional asset is temporarily unavailable.
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       await Promise.all(APP_SHELL.map(async path => {
