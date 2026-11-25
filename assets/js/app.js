@@ -346,7 +346,12 @@ function renderEvents() {
 }
 
 function renderLocations() {
-  $('locationHistory').innerHTML = `<table class="data-table"><thead><tr><th>When</th><th>Location</th></tr></thead><tbody>${state.locations.slice(0, 10).map(location => `<tr><td>${esc(fmtDate(recordTime(location)))}</td><td>${Number(location.latitude).toFixed(5)}, ${Number(location.longitude).toFixed(5)}</td></tr>`).join('') || '<tr><td colspan="2">No location history available.</td></tr>'}</tbody></table>`;
+  $('locationHistory').innerHTML = `<table class="data-table"><thead><tr><th>When</th><th>Location</th><th>Source</th><th>Accuracy</th></tr></thead><tbody>${state.locations.slice(0, 10).map(location => {
+    const source = location.source ? String(location.source).toUpperCase() : 'GPS';
+    const accuracy = Number.isFinite(Number(location.accuracy_m)) && location.accuracy_m !== null
+      ? `±${Math.round(Number(location.accuracy_m))} m` : 'Not available';
+    return `<tr><td>${esc(fmtDate(recordTime(location)))}</td><td>${Number(location.latitude).toFixed(5)}, ${Number(location.longitude).toFixed(5)}</td><td>${esc(source)}</td><td>${esc(accuracy)}</td></tr>`;
+  }).join('') || '<tr><td colspan="4">No location history available.</td></tr>'}</tbody></table>`;
 }
 
 function renderDevices() {

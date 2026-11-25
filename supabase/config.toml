@@ -1,0 +1,3 @@
+[functions.wifi-geolocation]
+# The ESP32 authenticates with the dedicated x-device-token header, not a Supabase user JWT.
+verify_jwt = false
