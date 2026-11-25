@@ -146,9 +146,9 @@ function uiSeverity(value) {
   return 'Medium';
 }
 
-function uiDistanceMeters(row) {
+function uiDistanceCm(row) {
   if (row?.distance_cm == null || !Number.isFinite(Number(row.distance_cm))) return null;
-  return Number(row.distance_cm) / 100;
+  return Number(row.distance_cm);
 }
 
 function latestDeviceUpdate() {
@@ -194,8 +194,8 @@ function renderRecent() {
   $('recentEvents').innerHTML = list.map(event => {
     const direction = uiDirection(event.direction);
     const severity = uiSeverity(event.severity);
-    const distance = uiDistanceMeters(event);
-    return `<div class="event-item">${dirGlyph(direction)}<div><b>${esc(direction === 'Center' ? 'Obstacle ahead' : `Obstacle on the ${direction.toLowerCase()}`)}</b><span>${distance == null ? 'Distance unavailable' : `${distance.toFixed(1)} m`} · ${esc(fmtAgo(recordTime(event)))}</span></div><small class="severity ${severityClass(severity)}">${severity === 'High' ? 'More urgent' : severity === 'Low' ? 'Less urgent' : 'Moderate'}</small></div>`;
+    const distance = uiDistanceCm(event);
+    return `<div class="event-item">${dirGlyph(direction)}<div><b>${esc(direction === 'Center' ? 'Obstacle ahead' : `Obstacle on the ${direction.toLowerCase()}`)}</b><span>${distance == null ? 'Distance unavailable' : `${distance.toFixed(1)} cm`} · ${esc(fmtAgo(recordTime(event)))}</span></div><small class="severity ${severityClass(severity)}">${severity === 'High' ? 'More urgent' : severity === 'Low' ? 'Less urgent' : 'Moderate'}</small></div>`;
   }).join('') || '<div class="empty">No alerts recorded.</div>';
 }
 
@@ -326,12 +326,12 @@ function renderEvents() {
     body = rows.map(row => {
       const severity = uiSeverity(row.severity);
       const direction = uiDirection(row.direction);
-      const distance = uiDistanceMeters(row);
+      const distance = uiDistanceCm(row);
       const label = direction === 'Center' ? 'Obstacle ahead' : `Obstacle on the ${direction.toLowerCase()}`;
       return `<tr>
         <td>${esc(fmtDate(recordTime(row)))}</td>
         <td><span class="alert-cell">${dirGlyph(direction)}<b>${esc(label)}</b></span></td>
-        <td>${distance == null ? 'Not available' : `${distance.toFixed(1)} m`}</td>
+        <td>${distance == null ? 'Not available' : `${distance.toFixed(1)} cm`}</td>
         <td><span class="severity ${severityClass(severity)}">${esc(severity)}</span></td>
         <td>${esc(row.voice_command || 'Not available')}</td>
       </tr>`;
@@ -418,14 +418,14 @@ function initMap(main = false) {
       const eventLocation = state.locations.find(item => item.id === event.location_id);
       if (!eventLocation) return;
       const severity = uiSeverity(event.severity);
-      const distance = uiDistanceMeters(event);
+      const distance = uiDistanceCm(event);
       L.circleMarker([eventLocation.latitude, eventLocation.longitude], {
         radius: 6,
         color: '#ffffff',
         weight: 2,
         fillColor: severity === 'High' ? '#b4492a' : '#946200',
         fillOpacity: 0.95
-      }).addTo(map).bindPopup(`<b>Obstacle detected</b><br>${esc(uiDirection(event.direction))} · ${distance.toFixed(1)} m<br><small>${esc(fmtAgo(recordTime(event)))}</small>`);
+      }).addTo(map).bindPopup(`<b>Obstacle detected</b><br>${esc(uiDirection(event.direction))} · ${distance == null ? 'Distance unavailable' : `${distance.toFixed(1)} cm`}<br><small>${esc(fmtAgo(recordTime(event)))}</small>`);
     });
   }
 
